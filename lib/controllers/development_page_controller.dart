@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:hex/hex.dart';
-import 'package:jny_self_services_library/services/locals/bridging_channel/method_channel_native.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
@@ -104,8 +103,6 @@ class DevelopmentPageController extends State<DevelopmentPage> {
 
       int codeLength = hex.length;
 
-      print("Code Length: $codeLength");
-
       int emptyStringLength = 16 - codeLength;
 
       String emptyString = "";
@@ -114,13 +111,11 @@ class DevelopmentPageController extends State<DevelopmentPage> {
         emptyString = "${emptyString}0";
       }
 
-      String updatedRFID = (hex + emptyString).toUpperCase();
-
-      print("UPDATED: $updatedRFID");
+      // String updatedRFID = (hex + emptyString).toUpperCase();
 
       result = true;
     } on Error catch(err) {
-      print("ERROR: $err");
+      OkDialog(context: context, content: "ERROR\n\n$err", headIcon: false).show();
     }
 
     // await MethodChannelNative(context: context).writeRFID(

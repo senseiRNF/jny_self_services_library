@@ -12,39 +12,52 @@ class ThanksViewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Image.asset(
-                controller.assetPath,
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20.0, right: 30.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Automatically redirecting to Main Menu in ${controller.countdownTime}',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 26.0,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
+      body: PopScope(
+        canPop: false,
+        onPopInvoked: (_) {},
+        child: SafeArea(
+          child: Stack(
+            children: [
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Image.asset(
+                  MediaQuery.of(context).orientation == Orientation.landscape ?
+                  controller.assetPathLandscape :
+                  controller.assetPathPortrait,
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-          ],
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0, right: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MediaQuery.of(context).orientation == Orientation.landscape ?
+                    MainAxisAlignment.end : MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Card(
+                        elevation: 5.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text(
+                            'Automatically redirecting to Main Menu in ${controller.countdownTime}',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 26.0,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

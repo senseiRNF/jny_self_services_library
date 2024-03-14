@@ -146,8 +146,13 @@ class LoadingDialog {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
-        return WillPopScope(
-          onWillPop: () async => Future.value(false),
+        return PopScope(
+          canPop: false,
+          onPopInvoked: (pop) {
+            if(pop) {
+              return;
+            }
+          },
           child: const AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,

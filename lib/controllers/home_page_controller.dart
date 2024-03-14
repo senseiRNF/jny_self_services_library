@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/account_page_controller.dart';
+import 'package:jny_self_services_library/controllers/book_list_page_controller.dart';
 import 'package:jny_self_services_library/controllers/borrow_page_controller.dart';
-import 'package:jny_self_services_library/controllers/development_page_controller.dart';
 import 'package:jny_self_services_library/controllers/lock_setting_page_controller.dart';
 import 'package:jny_self_services_library/controllers/qr_scan_page_controller.dart';
 import 'package:jny_self_services_library/controllers/renew_page_controller.dart';
@@ -27,8 +26,6 @@ class HomePageController extends State<HomePage> {
   List<Widget> carouselWidget = [];
 
   bool isOnScreensaver = true;
-
-  CarouselOptions? carouselOptions;
 
   Timer? gestureTimer;
 
@@ -247,8 +244,8 @@ class HomePageController extends State<HomePage> {
           },
         ),
         HomeMenuJson(
-          menuTitle: 'Development Test',
-          menuIcon: 'assets/images/icons/borrow.png',
+          menuTitle: 'Book Collections',
+          menuIcon: 'assets/images/icons/search.png',
           onPressed: () {
             if(gestureTimer != null) {
               setState(() {
@@ -258,7 +255,7 @@ class HomePageController extends State<HomePage> {
 
             MoveTo(
               context: context,
-              target: const DevelopmentPage(),
+              target: const BookListPage(),
               callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
                 gestureTimer = Timer.periodic(
                   const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
@@ -267,6 +264,27 @@ class HomePageController extends State<HomePage> {
             ).go();
           },
         ),
+        // HomeMenuJson(
+        //   menuTitle: 'Development Test',
+        //   menuIcon: 'assets/images/icons/borrow.png',
+        //   onPressed: () {
+        //     if(gestureTimer != null) {
+        //       setState(() {
+        //         gestureTimer!.cancel();
+        //       });
+        //     }
+        //
+        //     MoveTo(
+        //       context: context,
+        //       target: const DevelopmentPage(),
+        //       callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
+        //         gestureTimer = Timer.periodic(
+        //           const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
+        //         );
+        //       }) : {},
+        //     ).go();
+        //   },
+        // ),
       ];
     });
   }

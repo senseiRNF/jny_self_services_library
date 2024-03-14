@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
@@ -20,40 +19,38 @@ class AuthorizationServices {
     await NetworkOption.init().then((dio) async {
       LoadingDialog(context: context).show();
 
-      try {
-        await dio.post(
-          '/login',
-          data: {
-            'login': username,
-            'password': password,
-          },
-        ).then((postResult) async {
-          CloseBack(context: context).go();
+      await dio.post(
+        '/login',
+        data: {
+          'login': username,
+          'password': password,
+        },
+      ).then((postResult) async {
+        CloseBack(context: context).go();
 
-          LoginJson loginJson = LoginJson.fromJson(postResult.data);
+        LoginJson loginJson = LoginJson.fromJson(postResult.data);
 
-          if(loginJson.loginData != null && loginJson.loginData!.id != null) {
-            await SharedPrefsFunctions.writeData(
-              'account',
-              jsonEncode(
-                LocalAccountJson(
-                  userId: loginJson.loginData!.id!.toString(),
-                  username: loginJson.loginData!.username,
-                  name: loginJson.loginData!.name,
-                  email: loginJson.loginData!.email,
-                  accessToken: loginJson.loginData!.accessToken,
-                ).toJson(),
-              ),
-            ).then((_) {
-              result = true;
-            });
-          }
-        });
-      } on DioException catch(dioExc) {
+        if(loginJson.loginData != null && loginJson.loginData!.id != null) {
+          await SharedPrefsFunctions.writeData(
+            'account',
+            jsonEncode(
+              LocalAccountJson(
+                userId: loginJson.loginData!.id!.toString(),
+                username: loginJson.loginData!.username,
+                name: loginJson.loginData!.name,
+                email: loginJson.loginData!.email,
+                accessToken: loginJson.loginData!.accessToken,
+              ).toJson(),
+            ),
+          ).then((_) {
+            result = true;
+          });
+        }
+      }).catchError((dioExc) {
         CloseBack(context: context).go();
 
         ErrorHandler(context: context, dioExc: dioExc).show();
-      }
+      });
     });
 
     return result;

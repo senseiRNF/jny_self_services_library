@@ -45,6 +45,8 @@ public class MainActivity extends FlutterActivity {
     private static final int FLAG_FAIL = 4;
     private static final int FLAG_TIME_OVER = 5;
 
+    public int SET_POWER = 15;
+
     public BluetoothAdapter mBtAdapter = null;
 
     public RFIDWithUHFBLE uhf = RFIDWithUHFBLE.getInstance();
@@ -190,7 +192,9 @@ public class MainActivity extends FlutterActivity {
             return;
         }
 
-        uhf.setPower(15);
+        android.util.Log.d("POWER UNIT FOR RFID READER: ", String.valueOf(SET_POWER));
+
+        uhf.setPower(SET_POWER);
         uhf.setFrequencyMode(0x08);
 
         int idx = uhf.getRFLink();
@@ -280,6 +284,15 @@ public class MainActivity extends FlutterActivity {
                         }
                     } else {
                         result.error("BT_DISCONNECTED", "Bluetooth Device Not Found", null);
+                    }
+                    break;
+                case "setPowerLevel":
+                    if(uhf.getConnectStatus() == ConnectionStatus.CONNECTED) {
+                        SET_POWER = call.argument("powerLevel");
+
+                        result.success(true);
+                    } else {
+                        result.error("SET_FAILED", "Failed to set power level", null);
                     }
                     break;
                 default:

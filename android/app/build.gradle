@@ -44,7 +44,7 @@ android {
     namespace "com.intidata.jny_self_services_library"
     // compileSdkVersion flutter.compileSdkVersion
     compileSdk flutterCompileSdkVersion.toInteger()
-    ndkVersion flutter.ndkVersion
+    ndkVersion "26.2.11394342"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

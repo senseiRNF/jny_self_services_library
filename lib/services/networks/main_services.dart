@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
@@ -18,22 +17,20 @@ class MainServices {
     await NetworkOption.init().then((dio) async {
       LoadingDialog(context: context).show();
 
-      try {
-        await dio.get(
-          '/library/member',
-          queryParameters: {
-            'qr': qr,
-          },
-        ).then((getResult) {
-          result = LibraryMemberJson.fromJson(getResult.data);
+      await dio.get(
+        '/library/member',
+        queryParameters: {
+          'qr': qr,
+        },
+      ).then((getResult) {
+        result = LibraryMemberJson.fromJson(getResult.data);
 
-          CloseBack(context: context).go();
-        });
-      } on DioException catch(dioExc) {
+        CloseBack(context: context).go();
+      }).catchError((dioExc) {
         CloseBack(context: context).go();
 
         ErrorHandler(context: context, dioExc: dioExc).show();
-      }
+      });
     });
 
     return result;

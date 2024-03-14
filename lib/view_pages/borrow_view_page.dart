@@ -221,6 +221,35 @@ class BorrowViewPage extends StatelessWidget {
                     },
                   ),
                 ),
+                Card(
+                  elevation: 10.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text(
+                          "Total Books:",
+                          style: TextStyle(
+                            fontSize: 18.0,
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              "${controller.bookDataList.length} Book",
+                              style: const TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(

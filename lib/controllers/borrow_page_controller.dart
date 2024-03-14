@@ -142,8 +142,6 @@ class BorrowPageController extends State<BorrowPage> {
       });
     }
 
-    print("ITEM LIST: $itemList");
-
     StreamSubscription tempEventChannelStreamSubscription = const EventChannel('intidata.android/library_app_event').receiveBroadcastStream().listen((data) async {
       if(confirmBookDataList.isNotEmpty) {
         for(int i = 0; i < confirmBookDataList.length; i++) {
@@ -156,53 +154,51 @@ class BorrowPageController extends State<BorrowPage> {
       }
     });
 
-    Future.delayed(
-      const Duration(seconds: 3), () async {
-        CloseBack(context: context).go();
+    Future.delayed(const Duration(seconds: 3), () async {
+      CloseBack(context: context).go();
 
-        tempEventChannelStreamSubscription.cancel();
+      tempEventChannelStreamSubscription.cancel();
 
-        bool isAccepted = true;
+      bool isAccepted = true;
 
-        for(int i = 0; i < confirmBookDataList.length; i++) {
-          if(confirmBookDataList[i].keys.first == false) {
-            isAccepted = false;
+      for(int i = 0; i < confirmBookDataList.length; i++) {
+        if(confirmBookDataList[i].keys.first == false) {
+          isAccepted = false;
 
-            break;
+          break;
+        }
+      }
+
+      if(isAccepted == true) {
+        await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) {
+          if(result == true) {
+            MoveTo(
+              context: context,
+              target: const ThanksPage(
+                type: 0,
+              ),
+              callback: (_) => CloseBack(context: context).go(),
+            ).go();
+          } else {
+            startRFIDAuto();
           }
-        }
+        });
+      } else {
+        setState(() {
+          scannedRFID.clear();
+          bookDataList.clear();
+        });
 
-        if(isAccepted == true) {
-          await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) {
-            if(result == true) {
-              MoveTo(
-                context: context,
-                target: const ThanksPage(
-                  type: 0,
-                ),
-                callback: (_) => CloseBack(context: context).go(),
-              ).go();
-            } else {
-              startRFIDAuto();
-            }
-          });
-        } else {
-          setState(() {
-            scannedRFID.clear();
-            bookDataList.clear();
-          });
-
-          OkDialog(
-            context: context,
-            content: 'Failed to Borrow!\n\nPlease do not remove books from Scanner before process is completed',
-            headIcon: false,
-            okPressed: () {
-              startRFIDAuto();
-            },
-          ).show();
-        }
-      },
-    );
+        OkDialog(
+          context: context,
+          content: 'Failed to Borrow!\n\nPlease do not remove books from Scanner before process is completed',
+          headIcon: false,
+          okPressed: () {
+            startRFIDAuto();
+          },
+        ).show();
+      }
+    });
   }
 
   clearScannedRFIDList() {

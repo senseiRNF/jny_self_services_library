@@ -22,14 +22,32 @@ class SplashPageController extends State<SplashPage> {
   }
 
   checkAuthorization() async {
-    await SharedPrefsFunctions.readData('account').then((account) {
-      if(account != null) {
-        Future.delayed(const Duration(seconds: 3), () async {
-          ReplaceTo(context: context, target: const HomePage()).go();
+    await SharedPrefsFunctions.readData('powerLevel').then((powerLevel) async {
+      if(powerLevel != null) {
+        await SharedPrefsFunctions.readData('account').then((account) {
+          if(account != null) {
+            Future.delayed(const Duration(seconds: 3), () async {
+              ReplaceTo(context: context, target: const HomePage()).go();
+            });
+          } else {
+            Future.delayed(const Duration(seconds: 3), () async {
+              ReplaceTo(context: context, target: const SignInPage()).go();
+            });
+          }
         });
       } else {
-        Future.delayed(const Duration(seconds: 3), () async {
-          ReplaceTo(context: context, target: const SignInPage()).go();
+        await SharedPrefsFunctions.writeData('powerLevel', '15').then((_) async {
+          await SharedPrefsFunctions.readData('account').then((account) {
+            if(account != null) {
+              Future.delayed(const Duration(seconds: 3), () async {
+                ReplaceTo(context: context, target: const HomePage()).go();
+              });
+            } else {
+              Future.delayed(const Duration(seconds: 3), () async {
+                ReplaceTo(context: context, target: const SignInPage()).go();
+              });
+            }
+          });
         });
       }
     });
