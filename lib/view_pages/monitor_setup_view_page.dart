@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:jny_self_services_library/controllers/monitor_setup_page_controller.dart';
 
 class MonitorSetupViewPage extends StatelessWidget {
@@ -34,21 +36,35 @@ class MonitorSetupViewPage extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: ElevatedButton(
-              onPressed: () => controller.updateState("PENDING"),
-              style: ElevatedButton.styleFrom(
-                elevation: 10.0,
-              ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                child: Text(
-                  'Test Pairing ID',
-                  style: TextStyle(
-                    fontSize: 24.0,
-                  ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.5,
                 ),
+                itemCount: controller.testingList.length,
+                itemBuilder: (listContext, index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: ElevatedButton(
+                      onPressed: () => controller.updateState(controller.testingList[index]),
+                      style: ElevatedButton.styleFrom(
+                        elevation: 10.0,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+                        child: Text(
+                          controller.testingList[index],
+                          style: const TextStyle(
+                            fontSize: 24.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

@@ -16,6 +16,17 @@ class MonitorSetupPage extends StatefulWidget {
 class MonitorSetupPageController extends State<MonitorSetupPage> {
   TextEditingController pairingIDTEC = TextEditingController();
 
+  PocketBase pbConfig = PocketBaseConfig.pb;
+
+  List testingList = [
+    "IDLE",
+    "BORROW",
+    "RENEW",
+    "RETURN",
+    "SCAN_QR",
+    "READ_RFID",
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -25,12 +36,10 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
 
   Future checkPairingID() async {
     await SharedPrefsFunctions.readData('pairingID').then((pairingIDResult) {
-      if(pairingIDResult != null) {
+      if(pairingIDResult != null && pairingIDResult != '') {
         setState(() {
           pairingIDTEC.text = pairingIDResult;
         });
-
-        testPairingID();
       }
     });
   }
@@ -54,23 +63,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
     });
   }
 
-  testPairingID() async {
-    PocketBase pbConfig = PocketBaseConfig.pb;
-
-    await pbConfig.collection('testing').subscribe('*', (e) {
-      if(e.record != null && e.record!.id == pairingIDTEC.text) {
-        OkDialog(
-          context: context,
-          content: "Success pairing",
-          headIcon: true,
-        ).show();
-      }
-    });
-  }
-
   updateState(String state) async {
-    PocketBase pbConfig = PocketBaseConfig.pb;
-
     await pbConfig.collection('testing').update(
       pairingIDTEC.text,
       body: {

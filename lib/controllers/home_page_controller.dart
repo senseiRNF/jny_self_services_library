@@ -12,7 +12,9 @@ import 'package:jny_self_services_library/controllers/setting_page_controller.da
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/home_menu_json.dart';
 import 'package:jny_self_services_library/services/networks/main_services.dart';
+import 'package:jny_self_services_library/services/networks/pocket_base_config.dart';
 import 'package:jny_self_services_library/view_pages/home_view_page.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,6 +32,8 @@ class HomePageController extends State<HomePage> {
   Timer? gestureTimer;
 
   ScrollController scrollController = ScrollController();
+
+  PocketBase pbConfig = PocketBaseConfig.pb;
 
   @override
   void initState() {
@@ -264,27 +268,6 @@ class HomePageController extends State<HomePage> {
             ).go();
           },
         ),
-        // HomeMenuJson(
-        //   menuTitle: 'Development Test',
-        //   menuIcon: 'assets/images/icons/borrow.png',
-        //   onPressed: () {
-        //     if(gestureTimer != null) {
-        //       setState(() {
-        //         gestureTimer!.cancel();
-        //       });
-        //     }
-        //
-        //     MoveTo(
-        //       context: context,
-        //       target: const DevelopmentPage(),
-        //       callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
-        //         gestureTimer = Timer.periodic(
-        //           const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
-        //         );
-        //       }) : {},
-        //     ).go();
-        //   },
-        // ),
       ];
     });
   }
@@ -366,6 +349,8 @@ class HomePageController extends State<HomePage> {
 
   @override
   void dispose() {
+    pbConfig.collection("testing").unsubscribe("*");
+
     super.dispose();
   }
 }
