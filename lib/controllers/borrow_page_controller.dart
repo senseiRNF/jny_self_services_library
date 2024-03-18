@@ -11,6 +11,7 @@ import 'package:jny_self_services_library/services/locals/functions/route_functi
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
+import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/view_pages/borrow_view_page.dart';
@@ -57,6 +58,8 @@ class BorrowPageController extends State<BorrowPage> {
         ).show();
       }
     });
+
+    DisplayMonitorServices.sendStateToMonitor("READ_RFID");
   }
 
   Future checkConnection() async {

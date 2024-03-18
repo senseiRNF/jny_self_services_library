@@ -15,7 +15,7 @@ class BookListViewPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Book Collections",
+          "Search Book",
         ),
       ),
       body: Column(

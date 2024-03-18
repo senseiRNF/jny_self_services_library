@@ -11,6 +11,7 @@ import 'package:jny_self_services_library/controllers/return_page_controller.dar
 import 'package:jny_self_services_library/controllers/setting_page_controller.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/home_menu_json.dart';
+import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/main_services.dart';
 import 'package:jny_self_services_library/services/networks/pocket_base_config.dart';
 import 'package:jny_self_services_library/view_pages/home_view_page.dart';
@@ -65,11 +66,18 @@ class HomePageController extends State<HomePage> {
                         target: BorrowPage(
                           libraryMemberData: result.libraryMemberData!,
                         ),
-                        callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
-                          gestureTimer = Timer.periodic(
-                            const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
-                          );
-                        }) : {},
+                        callback: (_) {
+                          if(gestureTimer != null && gestureTimer!.isActive == false) {
+                            setState(() {
+                              gestureTimer = Timer.periodic(
+                                const Duration(seconds: 1), (timer) =>
+                                  checkTimeout(timer.tick),
+                              );
+                            });
+                          }
+
+                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                        },
                       ).go();
                     } else {
                       if(gestureTimer != null && gestureTimer!.isActive == false) {
@@ -116,11 +124,18 @@ class HomePageController extends State<HomePage> {
                         target: RenewPage(
                           libraryMemberData: result.libraryMemberData!,
                         ),
-                        callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
-                          gestureTimer = Timer.periodic(
-                            const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
-                          );
-                        }) : {},
+                        callback: (_) {
+                          if(gestureTimer != null && gestureTimer!.isActive == false) {
+                            setState(() {
+                              gestureTimer = Timer.periodic(
+                                const Duration(seconds: 1), (timer) =>
+                                  checkTimeout(timer.tick),
+                              );
+                            });
+                          }
+
+                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                        },
                       ).go();
                     } else {
                       if(gestureTimer != null && gestureTimer!.isActive == false) {
@@ -167,11 +182,18 @@ class HomePageController extends State<HomePage> {
                         target: ReturnPage(
                           libraryMemberData: result.libraryMemberData!,
                         ),
-                        callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
-                          gestureTimer = Timer.periodic(
-                            const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
-                          );
-                        }) : {},
+                        callback: (_) {
+                          if(gestureTimer != null && gestureTimer!.isActive == false) {
+                            setState(() {
+                              gestureTimer = Timer.periodic(
+                                const Duration(seconds: 1), (timer) =>
+                                  checkTimeout(timer.tick),
+                              );
+                            });
+                          }
+
+                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                        },
                       ).go();
                     } else {
                       if(gestureTimer != null && gestureTimer!.isActive == false) {
@@ -218,11 +240,18 @@ class HomePageController extends State<HomePage> {
                         target: AccountPage(
                           libraryMemberData: result.libraryMemberData!,
                         ),
-                        callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
-                          gestureTimer = Timer.periodic(
-                            const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
-                          );
-                        }) : {},
+                        callback: (_) {
+                          if(gestureTimer != null && gestureTimer!.isActive == false) {
+                            setState(() {
+                              gestureTimer = Timer.periodic(
+                                const Duration(seconds: 1), (timer) =>
+                                  checkTimeout(timer.tick),
+                              );
+                            });
+                          }
+
+                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                        },
                       ).go();
                     } else {
                       if(gestureTimer != null && gestureTimer!.isActive == false) {
@@ -248,7 +277,7 @@ class HomePageController extends State<HomePage> {
           },
         ),
         HomeMenuJson(
-          menuTitle: 'Book Collections',
+          menuTitle: 'Search Book',
           menuIcon: 'assets/images/icons/search.png',
           onPressed: () {
             if(gestureTimer != null) {
@@ -260,11 +289,18 @@ class HomePageController extends State<HomePage> {
             MoveTo(
               context: context,
               target: const BookListPage(),
-              callback: (_) => gestureTimer != null && gestureTimer!.isActive == false ? setState(() {
-                gestureTimer = Timer.periodic(
-                  const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
-                );
-              }) : {},
+              callback: (_) {
+                if(gestureTimer != null && gestureTimer!.isActive == false) {
+                  setState(() {
+                    gestureTimer = Timer.periodic(
+                      const Duration(seconds: 1), (timer) =>
+                        checkTimeout(timer.tick),
+                    );
+                  });
+                }
+
+                DisplayMonitorServices.sendStateToMonitor("IDLE");
+              },
             ).go();
           },
         ),
@@ -323,10 +359,13 @@ class HomePageController extends State<HomePage> {
               if(gestureTimer != null && gestureTimer!.isActive == false) {
                 setState(() {
                   gestureTimer = Timer.periodic(
-                    const Duration(seconds: 1), (timer) => checkTimeout(timer.tick),
+                    const Duration(seconds: 1), (timer) =>
+                      checkTimeout(timer.tick),
                   );
                 });
               }
+
+              DisplayMonitorServices.sendStateToMonitor("IDLE");
             },
           ).go();
         } else {
@@ -349,6 +388,10 @@ class HomePageController extends State<HomePage> {
 
   @override
   void dispose() {
+    if(gestureTimer != null) {
+      gestureTimer!.cancel();
+    }
+
     pbConfig.collection("testing").unsubscribe("*");
 
     super.dispose();

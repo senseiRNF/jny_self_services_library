@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
+import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/view_pages/qr_scan_view_page.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -26,6 +27,8 @@ class QRScanPageController extends State<QRScanPage> {
     super.initState();
 
     checkCameraPermission();
+
+    DisplayMonitorServices.sendStateToMonitor("SCAN_QR");
   }
 
   checkCameraPermission() async {

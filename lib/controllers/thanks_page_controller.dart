@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
+import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/view_pages/thanks_view_page.dart';
 
 class ThanksPage extends StatefulWidget {
@@ -50,6 +51,20 @@ class ThanksPageController extends State<ThanksPage> {
         }
       });
     });
+
+    switch(widget.type) {
+      case 0:
+        DisplayMonitorServices.sendStateToMonitor("BORROW");
+        break;
+      case 1:
+        DisplayMonitorServices.sendStateToMonitor("RETURN");
+        break;
+      case 2:
+        DisplayMonitorServices.sendStateToMonitor("RENEW");
+        break;
+      default:
+        break;
+    }
   }
 
   @override
