@@ -54,13 +54,31 @@ class ThanksPageController extends State<ThanksPage> {
 
     switch(widget.type) {
       case 0:
-        DisplayMonitorServices.sendStateToMonitor("BORROW");
+        DisplayMonitorServices.sendStateToMonitor(
+          "BORROW",
+          {
+            "library_member": {},
+            "book_list": {},
+          },
+        );
         break;
       case 1:
-        DisplayMonitorServices.sendStateToMonitor("RETURN");
+        DisplayMonitorServices.sendStateToMonitor(
+          "RETURN",
+          {
+            "library_member": {},
+            "book_list": {},
+          },
+        );
         break;
       case 2:
-        DisplayMonitorServices.sendStateToMonitor("RENEW");
+        DisplayMonitorServices.sendStateToMonitor(
+          "RENEW",
+          {
+            "library_member": {},
+            "book_list": {},
+          },
+        );
         break;
       default:
         break;

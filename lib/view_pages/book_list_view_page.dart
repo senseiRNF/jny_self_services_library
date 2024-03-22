@@ -23,14 +23,102 @@ class BookListViewPage extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-            child: TextField(
-              controller: controller.searchQueryTEC,
-              decoration: const InputDecoration(
-                labelText: "Search Book by 'Title' or 'Authors'",
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: (_) => controller.searchBook(),
-              textInputAction: TextInputAction.search,
+            child: Column(
+              children: [
+                TextField(
+                  controller: controller.searchQueryTEC,
+                  decoration: const InputDecoration(
+                    labelText: "Search Book by 'Title' or 'Authors'",
+                    border: OutlineInputBorder(),
+                  ),
+                  onSubmitted: (_) => controller.searchBook(),
+                  textInputAction: TextInputAction.search,
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black38,
+                          ),
+                          borderRadius: BorderRadius.circular(3.0),
+                        ),
+                        child: InkWell(
+                          onTap: () => controller.openSubjectList(),
+                          customBorder: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    controller.selectedSubject.name ?? "Unknown",
+                                    style: const TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_drop_down,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10.0,
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Colors.black38,
+                          ),
+                          borderRadius: BorderRadius.circular(3.0),
+                        ),
+                        child: InkWell(
+                          onTap: () => controller.openLanguageList(),
+                          customBorder: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(3.0),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    controller.selectedLanguage.name ?? "Unknown",
+                                    style: const TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.arrow_drop_down,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -42,139 +130,145 @@ class BookListViewPage extends StatelessWidget {
                 itemBuilder: (listContext, index) {
                   return Card(
                     elevation: 5.0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).orientation == Orientation.landscape ?
-                            MediaQuery.of(context).size.width / 12 :
-                            MediaQuery.of(context).size.width / 8,
-                            child: CachedNetworkImage(
-                              imageUrl: controller.queryBookList[index].mediaPath ?? '',
-                              fit: BoxFit.contain,
+                    child: InkWell(
+                      onTap: () => controller.showBookDetail(controller.queryBookList[index]),
+                      customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).orientation == Orientation.landscape ?
+                              MediaQuery.of(context).size.width / 12 :
+                              MediaQuery.of(context).size.width / 8,
+                              child: CachedNetworkImage(
+                                imageUrl: controller.queryBookList[index].mediaPath ?? '',
+                                fit: BoxFit.contain,
+                              ),
                             ),
-                          ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  controller.queryBookList[index].title ?? 'Unknown Title',
-                                  style: const TextStyle(
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w700,
+                            const SizedBox(
+                              width: 20.0,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    controller.queryBookList[index].title ?? 'Unknown Title',
+                                    style: const TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Code: ',
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: Text(
-                                        controller.queryBookList[index].code ?? 'Unknown Code',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Code: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].code ?? 'Unknown Code',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'ISBN/ISSN: ',
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: Text(
-                                        controller.queryBookList[index].isbnOrIssn ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'ISBN/ISSN: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].isbnOrIssn ?? 'Unknown',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Authors: ',
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: Text(
-                                        controller.queryBookList[index].authorNames ?? 'Unknown Authors',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Authors: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].authorNames ?? 'Unknown Authors',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Publisher: ',
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: Text(
-                                        controller.queryBookList[index].publisher ?? 'Unknown Publisher',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Publisher: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].publisher ?? 'Unknown Publisher',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Publishing Year: ',
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: Text(
-                                        controller.queryBookList[index].publishingYear ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Publishing Year: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].publishingYear ?? 'Unknown',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Row(
-                                  children: [
-                                    const Text(
-                                      'Location: ',
-                                    ),
-                                    Expanded(
-                                      flex: 6,
-                                      child: Text(
-                                        controller.queryBookList[index].location ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Location: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].location ?? 'Unknown',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );

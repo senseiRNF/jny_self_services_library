@@ -38,6 +38,8 @@ class BorrowPageController extends State<BorrowPage> {
   List scannedRFID = [];
   List<BookDataJson> bookDataList = [];
 
+  BookDataJson? lowQuota;
+
   BluetoothDevice? connectedDevice;
 
   @override
@@ -59,7 +61,13 @@ class BorrowPageController extends State<BorrowPage> {
       }
     });
 
-    DisplayMonitorServices.sendStateToMonitor("READ_RFID");
+    DisplayMonitorServices.sendStateToMonitor(
+      "READ_RFID",
+      {
+        "library_member": widget.libraryMemberData.toJson(),
+        "book_list": {},
+      },
+    );
   }
 
   Future checkConnection() async {
@@ -95,6 +103,20 @@ class BorrowPageController extends State<BorrowPage> {
               setState(() {
                 bookDataList.add(bookResult);
               });
+
+              List<Map> tempBookDataList = [];
+
+              for(int i = 0; i < bookDataList.length; i++) {
+                tempBookDataList.add(bookDataList[i].toJson());
+              }
+
+              DisplayMonitorServices.sendStateToMonitor(
+                "READ_RFID",
+                {
+                  "library_member": widget.libraryMemberData.toJson(),
+                  "book_list": tempBookDataList,
+                },
+              );
             }
           });
         }
@@ -209,6 +231,14 @@ class BorrowPageController extends State<BorrowPage> {
       scannedRFID.clear();
       bookDataList.clear();
     });
+
+    DisplayMonitorServices.sendStateToMonitor(
+      "READ_RFID",
+      {
+        "library_member": widget.libraryMemberData.toJson(),
+        "book_list": {},
+      },
+    );
   }
 
   @override

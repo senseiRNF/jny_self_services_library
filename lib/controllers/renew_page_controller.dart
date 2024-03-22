@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/controllers/thanks_page_controller.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
+import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/view_pages/renew_view_page.dart';
@@ -44,16 +45,26 @@ class RenewPageController extends State<RenewPage> {
 
     await BookServices(context: context).checkBorrowedBook(studentId, employeeId).then((result) {
       List<BorrowedDetailDataJson> tempList = [];
+      List<Map> tempConvertedList = [];
 
       if(result != null && result.borrowedDetailDataJson != null) {
         for(int i = 0; i < result.borrowedDetailDataJson!.length; i++) {
           tempList.add(result.borrowedDetailDataJson![i]);
+          tempConvertedList.add(result.borrowedDetailDataJson![i].toJson());
         }
       }
 
       setState(() {
         listBorrowedDetail = tempList;
       });
+
+      DisplayMonitorServices.sendStateToMonitor(
+        "SHOW_RENEW",
+        {
+          "library_member": widget.libraryMemberData.toJson(),
+          "book_list": tempConvertedList,
+        },
+      );
     });
   }
 
@@ -91,15 +102,25 @@ class RenewPageController extends State<RenewPage> {
 
   showBorrowedBooks(int id, List<BorrowedBooksDataJson> listBooks) {
     List<BorrowedBooksDataJson> tempList = [];
+    List<Map> tempConvertedList = [];
 
     for(int i = 0; i < listBooks.length; i++) {
       tempList.add(listBooks[i]);
+      tempConvertedList.add(listBooks[i].toJson());
     }
 
     setState(() {
       listBorrowedBooks = tempList;
       borrowId = id;
     });
+
+    DisplayMonitorServices.sendStateToMonitor(
+      "SHOW_RENEW_LIST",
+      {
+        "library_member": widget.libraryMemberData.toJson(),
+        "book_list": tempConvertedList,
+      },
+    );
   }
 
   closeBorrowedBooks() {
@@ -107,6 +128,8 @@ class RenewPageController extends State<RenewPage> {
       listBorrowedBooks.clear();
       borrowId = null;
     });
+
+    checkBorrowedBook();
   }
 
   @override

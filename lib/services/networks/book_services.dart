@@ -8,6 +8,8 @@ import 'package:jny_self_services_library/services/locals/functions/shared_prefs
 import 'package:jny_self_services_library/services/locals/local_jsons/local_account_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
+import 'package:jny_self_services_library/services/networks/jsons/language_list_json.dart';
+import 'package:jny_self_services_library/services/networks/jsons/subjects_list_json.dart';
 import 'package:jny_self_services_library/services/networks/network_options.dart';
 
 class BookServices {
@@ -283,6 +285,94 @@ class BookServices {
 
           if(getResult.statusCode == 200 || getResult.statusCode == 201) {
             result = true;
+          }
+        }).catchError((dioExc) {
+          CloseBack(context: context).go();
+
+          if(dioExc.response != null && dioExc.response!.statusCode != 404) {
+            ErrorHandler(context: context, dioExc: dioExc).show();
+          }
+        });
+      });
+    });
+
+    return result;
+  }
+
+  Future<List<LanguageListDataJson>> showAllLanguage() async {
+    List<LanguageListDataJson> result = [];
+    LocalAccountJson? account;
+
+    await SharedPrefsFunctions.readData('account').then((accountResult) async {
+      if(accountResult != null) {
+        account = LocalAccountJson.fromJson(jsonDecode(accountResult));
+      }
+
+      await NetworkOption.init().then((dio) async {
+        LoadingDialog(context: context).show();
+
+        await dio.get(
+          '/library/language',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${account?.accessToken}',
+            },
+          ),
+        ).then((getResult) {
+          CloseBack(context: context).go();
+
+          if(getResult.statusCode == 200 || getResult.statusCode == 201) {
+            if(getResult.data != null) {
+              LanguageListJson languageListJson = LanguageListJson.fromJson(getResult.data);
+
+              if(languageListJson.languageListDataJson != null) {
+                result = languageListJson.languageListDataJson!;
+              }
+            }
+          }
+        }).catchError((dioExc) {
+          CloseBack(context: context).go();
+
+          if(dioExc.response != null && dioExc.response!.statusCode != 404) {
+            ErrorHandler(context: context, dioExc: dioExc).show();
+          }
+        });
+      });
+    });
+
+    return result;
+  }
+
+  Future<List<SubjectListDataJson>> showAllSubjects() async {
+    List<SubjectListDataJson> result = [];
+    LocalAccountJson? account;
+
+    await SharedPrefsFunctions.readData('account').then((accountResult) async {
+      if(accountResult != null) {
+        account = LocalAccountJson.fromJson(jsonDecode(accountResult));
+      }
+
+      await NetworkOption.init().then((dio) async {
+        LoadingDialog(context: context).show();
+
+        await dio.get(
+          '/library/subjects',
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${account?.accessToken}',
+            },
+          ),
+        ).then((getResult) {
+          CloseBack(context: context).go();
+
+          if(getResult.statusCode == 200 || getResult.statusCode == 201) {
+            if(getResult.data != null) {
+              SubjectListJson subjectListJson = SubjectListJson.fromJson(getResult.data);
+
+              if(subjectListJson.subjectListDataJson != null) {
+                result = subjectListJson.subjectListDataJson!;
+              }
+            }
           }
         }).catchError((dioExc) {
           CloseBack(context: context).go();

@@ -56,6 +56,10 @@ class BookDataJson {
   String? title;
   String? isbnOrIssn;
   String? publishingYear;
+  String? subjectId;
+  int? languageId;
+  String? subjectName;
+  String? languageName;
   bool? isAvailable;
   String? rfidTag;
   String? code;
@@ -70,6 +74,10 @@ class BookDataJson {
     this.title,
     this.isbnOrIssn,
     this.publishingYear,
+    this.subjectId,
+    this.languageId,
+    this.subjectName,
+    this.languageName,
     this.isAvailable,
     this.rfidTag,
     this.code,
@@ -85,6 +93,10 @@ class BookDataJson {
     title = json['title'];
     isbnOrIssn = json['isbn_or_issn'];
     publishingYear = json['publishing_year'];
+    subjectId = json['subject_id'];
+    languageId = json['language_id'];
+    subjectName = json['subject_name'];
+    languageName = json['language_name'];
     isAvailable = json['is_available'];
     rfidTag = json['rfid_tag'];
     code = json['code'];
@@ -101,6 +113,10 @@ class BookDataJson {
     data['title'] = title;
     data['isbn_or_issn'] = isbnOrIssn;
     data['publishing_year'] = publishingYear;
+    data['subject_id'] = subjectId;
+    data['language_id'] = languageId;
+    data['subject_name'] = subjectName;
+    data['language_name'] = languageName;
     data['is_available'] = isAvailable;
     data['rfid_tag'] = rfidTag;
     data['code'] = code;

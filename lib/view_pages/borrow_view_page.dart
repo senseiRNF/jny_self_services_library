@@ -85,7 +85,7 @@ class BorrowViewPage extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.all(20.0),
                   child: Text(
-                    'Place the book in the scanner to continue',
+                    'Place the book in the scanner area to continue',
                     style: TextStyle(
                       fontSize: 28.0,
                       fontWeight: FontWeight.bold,
@@ -229,7 +229,7 @@ class BorrowViewPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Text(
-                          "Total Books:",
+                          "Total Book(s):",
                           style: TextStyle(
                             fontSize: 18.0,
                           ),

@@ -76,7 +76,13 @@ class HomePageController extends State<HomePage> {
                             });
                           }
 
-                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                          DisplayMonitorServices.sendStateToMonitor(
+                            "IDLE",
+                            {
+                              "library_member": {},
+                              "book_list": {},
+                            },
+                          );
                         },
                       ).go();
                     } else {
@@ -97,6 +103,14 @@ class HomePageController extends State<HomePage> {
                       );
                     });
                   }
+
+                  DisplayMonitorServices.sendStateToMonitor(
+                    "IDLE",
+                    {
+                      "library_member": {},
+                      "book_list": {},
+                    },
+                  );
                 }
               },
             ).go();
@@ -134,7 +148,13 @@ class HomePageController extends State<HomePage> {
                             });
                           }
 
-                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                          DisplayMonitorServices.sendStateToMonitor(
+                            "IDLE",
+                            {
+                              "library_member": {},
+                              "book_list": {},
+                            },
+                          );
                         },
                       ).go();
                     } else {
@@ -155,6 +175,14 @@ class HomePageController extends State<HomePage> {
                       );
                     });
                   }
+
+                  DisplayMonitorServices.sendStateToMonitor(
+                    "IDLE",
+                    {
+                      "library_member": {},
+                      "book_list": {},
+                    },
+                  );
                 }
               },
             ).go();
@@ -192,7 +220,13 @@ class HomePageController extends State<HomePage> {
                             });
                           }
 
-                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                          DisplayMonitorServices.sendStateToMonitor(
+                            "IDLE",
+                            {
+                              "library_member": {},
+                              "book_list": {},
+                            },
+                          );
                         },
                       ).go();
                     } else {
@@ -213,6 +247,14 @@ class HomePageController extends State<HomePage> {
                       );
                     });
                   }
+
+                  DisplayMonitorServices.sendStateToMonitor(
+                    "IDLE",
+                    {
+                      "library_member": {},
+                      "book_list": {},
+                    },
+                  );
                 }
               },
             ).go();
@@ -250,7 +292,13 @@ class HomePageController extends State<HomePage> {
                             });
                           }
 
-                          DisplayMonitorServices.sendStateToMonitor("IDLE");
+                          DisplayMonitorServices.sendStateToMonitor(
+                            "IDLE",
+                            {
+                              "library_member": {},
+                              "book_list": {},
+                            },
+                          );
                         },
                       ).go();
                     } else {
@@ -264,6 +312,14 @@ class HomePageController extends State<HomePage> {
                     }
                   });
                 } else {
+                  DisplayMonitorServices.sendStateToMonitor(
+                    "IDLE",
+                    {
+                      "library_member": {},
+                      "book_list": {},
+                    },
+                  );
+
                   if(gestureTimer != null && gestureTimer!.isActive == false) {
                     setState(() {
                       gestureTimer = Timer.periodic(
@@ -299,7 +355,13 @@ class HomePageController extends State<HomePage> {
                   });
                 }
 
-                DisplayMonitorServices.sendStateToMonitor("IDLE");
+                DisplayMonitorServices.sendStateToMonitor(
+                  "IDLE",
+                  {
+                    "library_member": {},
+                    "book_list": {},
+                  },
+                );
               },
             ).go();
           },
@@ -365,7 +427,13 @@ class HomePageController extends State<HomePage> {
                 });
               }
 
-              DisplayMonitorServices.sendStateToMonitor("IDLE");
+              DisplayMonitorServices.sendStateToMonitor(
+                "IDLE",
+                {
+                  "library_member": {},
+                  "book_list": {},
+                },
+              );
             },
           ).go();
         } else {
@@ -376,6 +444,14 @@ class HomePageController extends State<HomePage> {
               );
             });
           }
+
+          DisplayMonitorServices.sendStateToMonitor(
+            "IDLE",
+            {
+              "library_member": {},
+              "book_list": {},
+            },
+          );
         }
       },
     ).go();

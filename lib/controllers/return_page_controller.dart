@@ -48,8 +48,6 @@ class ReturnPageController extends State<ReturnPage> {
     super.initState();
 
     checkBorrowedBook();
-
-    DisplayMonitorServices.sendStateToMonitor("READ_RFID");
   }
 
   Future checkConnection() async {
@@ -61,6 +59,41 @@ class ReturnPageController extends State<ReturnPage> {
           connectedDevice = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!));
         }
       }
+    });
+  }
+
+  Future checkBorrowedBook() async {
+    String? studentId;
+    String? employeeId;
+
+    if(widget.libraryMemberData.nis != null) {
+      studentId = widget.libraryMemberData.id!.toString();
+    } else if(widget.libraryMemberData.nik != null) {
+      employeeId = widget.libraryMemberData.id!.toString();
+    }
+
+    await BookServices(context: context).checkBorrowedBook(studentId, employeeId).then((result) {
+      List<BorrowedDetailDataJson> tempList = [];
+      List<Map> tempConvertedList = [];
+
+      if(result != null && result.borrowedDetailDataJson != null) {
+        for(int i = 0; i < result.borrowedDetailDataJson!.length; i++) {
+          tempList.add(result.borrowedDetailDataJson![i]);
+          tempConvertedList.add(result.borrowedDetailDataJson![i].toJson());
+        }
+      }
+
+      setState(() {
+        listBorrowedDetail = tempList;
+      });
+
+      DisplayMonitorServices.sendStateToMonitor(
+        "SHOW_RETURN",
+        {
+          "library_member": widget.libraryMemberData.toJson(),
+          "book_list": tempConvertedList,
+        },
+      );
     });
   }
 
@@ -79,15 +112,37 @@ class ReturnPageController extends State<ReturnPage> {
           });
 
           if(listBorrowedBooks.isNotEmpty) {
+            List<Map> tempConvertedList = [];
+
             for(int i = 0; i < listBorrowedBooks.length; i++) {
+              BorrowedBooksDataJson tempData = listBorrowedBooks[i].values.first;
+
               if(data.toString().substring(0, 16) == "${listBorrowedBooks[i].values.first.rfidTag!.substring(0, 14)}00") {
-                BorrowedBooksDataJson tempData = listBorrowedBooks[i].values.first;
+                tempConvertedList.add({
+                  "scanned": true,
+                  "book_data": tempData.toJson(),
+                });
 
                 setState(() {
                   listBorrowedBooks[i] = {true: tempData};
                   isAbleToProceed = true;
                 });
+              } else {
+                tempConvertedList.add({
+                  "scanned": listBorrowedBooks[i].keys.first,
+                  "book_data": tempData.toJson(),
+                });
               }
+            }
+
+            if(tempConvertedList.isNotEmpty) {
+              DisplayMonitorServices.sendStateToMonitor(
+                "SHOW_RETURN_LIST",
+                {
+                  "library_member": widget.libraryMemberData.toJson(),
+                  "book_list": tempConvertedList,
+                },
+              );
             }
           }
         }
@@ -102,31 +157,6 @@ class ReturnPageController extends State<ReturnPage> {
         eventChannelStreamSubscription!.cancel();
       });
     }
-  }
-
-  Future checkBorrowedBook() async {
-    String? studentId;
-    String? employeeId;
-
-    if(widget.libraryMemberData.nis != null) {
-      studentId = widget.libraryMemberData.id!.toString();
-    } else if(widget.libraryMemberData.nik != null) {
-      employeeId = widget.libraryMemberData.id!.toString();
-    }
-
-    await BookServices(context: context).checkBorrowedBook(studentId, employeeId).then((result) {
-      List<BorrowedDetailDataJson> tempList = [];
-
-      if(result != null && result.borrowedDetailDataJson != null) {
-        for(int i = 0; i < result.borrowedDetailDataJson!.length; i++) {
-          tempList.add(result.borrowedDetailDataJson![i]);
-        }
-      }
-
-      setState(() {
-        listBorrowedDetail = tempList;
-      });
-    });
   }
 
   returnBook(int borrowId) async {
@@ -177,8 +207,7 @@ class ReturnPageController extends State<ReturnPage> {
         }
       });
 
-      Future.delayed(
-        const Duration(seconds: 3), () async {
+      Future.delayed(const Duration(seconds: 3), () async {
         CloseBack(context: context).go();
 
         tempEventChannelStreamSubscription.cancel();
@@ -215,8 +244,7 @@ class ReturnPageController extends State<ReturnPage> {
             okPressed: () => {},
           ).show();
         }
-      },
-      );
+      });
     } else {
       CloseBack(context: context).go();
 
@@ -233,9 +261,14 @@ class ReturnPageController extends State<ReturnPage> {
 
   showBorrowedBooks(int id, List<BorrowedBooksDataJson> listBooks) {
     List<Map<bool, BorrowedBooksDataJson>> tempList = [];
+    List<Map> tempConvertedList = [];
 
     for(int i = 0; i < listBooks.length; i++) {
       tempList.add({false: listBooks[i]});
+      tempConvertedList.add({
+        "scanned": false,
+        "book_data": listBooks[i].toJson(),
+      });
     }
 
     setState(() {
@@ -246,6 +279,14 @@ class ReturnPageController extends State<ReturnPage> {
     checkConnection().then((_) {
       if(connectedDevice != null) {
         if(isOnListen == false) {
+          DisplayMonitorServices.sendStateToMonitor(
+            "SHOW_RETURN_LIST",
+            {
+              "library_member": widget.libraryMemberData.toJson(),
+              "book_list": tempConvertedList,
+            },
+          );
+
           startRFIDAuto();
 
           changeOnListenStatus();
@@ -274,6 +315,8 @@ class ReturnPageController extends State<ReturnPage> {
         eventChannelStreamSubscription!.cancel();
       }
     });
+
+    checkBorrowedBook();
   }
 
   @override

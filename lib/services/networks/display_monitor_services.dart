@@ -3,7 +3,7 @@ import 'package:jny_self_services_library/services/networks/pocket_base_config.d
 import 'package:pocketbase/pocketbase.dart';
 
 class DisplayMonitorServices {
-  static sendStateToMonitor(String state) async {
+  static sendStateToMonitor(String state, Map args) async {
     PocketBase pbConfig = PocketBaseConfig.pb;
 
     await SharedPrefsFunctions.readData('pairingID').then((pairingIDResult) {
@@ -12,6 +12,7 @@ class DisplayMonitorServices {
           pairingIDResult,
           body: {
             "state": state,
+            "args": args,
           },
         );
       }

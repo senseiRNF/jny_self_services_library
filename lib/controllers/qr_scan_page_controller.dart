@@ -28,7 +28,13 @@ class QRScanPageController extends State<QRScanPage> {
 
     checkCameraPermission();
 
-    DisplayMonitorServices.sendStateToMonitor("SCAN_QR");
+    DisplayMonitorServices.sendStateToMonitor(
+      "SCAN_QR",
+      {
+        "library_member": {},
+        "book_list": {},
+      },
+    );
   }
 
   checkCameraPermission() async {
