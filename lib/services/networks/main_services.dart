@@ -14,7 +14,7 @@ class MainServices {
   Future<LibraryMemberJson?> showLibraryMember(String? qr) async {
     LibraryMemberJson? result;
 
-    await NetworkOption.init().then((dio) async {
+    await NetworkOption.initJNYAPI().then((dio) async {
       LoadingDialog(context: context).show();
 
       await dio.get(

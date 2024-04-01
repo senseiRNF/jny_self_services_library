@@ -20,18 +20,16 @@ class MonitorSetupViewPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-              child: TextField(
-                controller: controller.pairingIDTEC,
-                decoration: const InputDecoration(
-                  labelText: "Monitor Pairing ID",
-                  border: OutlineInputBorder(),
-                ),
-                onSubmitted: (_) => controller.savePairingID(),
-                textInputAction: TextInputAction.done,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+            child: TextField(
+              controller: controller.pairingIDTEC,
+              decoration: const InputDecoration(
+                labelText: "Monitor Pairing ID",
+                border: OutlineInputBorder(),
               ),
+              onSubmitted: (_) => controller.savePairingID(),
+              textInputAction: TextInputAction.done,
             ),
           ),
           Expanded(
@@ -39,7 +37,7 @@ class MonitorSetupViewPage extends StatelessWidget {
               padding: const EdgeInsets.all(10.0),
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
+                  crossAxisCount: 3,
                   childAspectRatio: 1.5,
                 ),
                 itemCount: controller.testingList.length,

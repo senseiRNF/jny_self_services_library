@@ -11,6 +11,7 @@ import 'package:jny_self_services_library/services/locals/functions/route_functi
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
+import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
@@ -195,17 +196,38 @@ class BorrowPageController extends State<BorrowPage> {
       }
 
       if(isAccepted == true) {
-        await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) {
-          if(result == true) {
-            MoveTo(
-              context: context,
-              target: const ThanksPage(
-                type: 0,
-              ),
-              callback: (_) => CloseBack(context: context).go(),
-            ).go();
+        List<String> epcList = [];
+
+        for(int i = 0; i < bookDataList.length; i++) {
+          if(bookDataList[i].id != null && bookDataList[i].rfidTag != null) {
+            epcList.add(bookDataList[i].rfidTag!);
+          }
+        }
+
+        await ControlGateServices(context: context).postAlarmToGate(epcList).then((postAlarmResult) async {
+          if(postAlarmResult == true) {
+            await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
+              if(result == true) {
+                MoveTo(
+                  context: context,
+                  target: const ThanksPage(
+                    type: 0,
+                  ),
+                  callback: (_) => CloseBack(context: context).go(),
+                ).go();
+              } else {
+                await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
+                  startRFIDAuto();
+                });
+              }
+            });
           } else {
-            startRFIDAuto();
+            OkDialog(
+              context: context,
+              content: 'Failed to communicating with gate system, please try again!',
+              headIcon: false,
+              okPressed: () => {},
+            ).show();
           }
         });
       } else {

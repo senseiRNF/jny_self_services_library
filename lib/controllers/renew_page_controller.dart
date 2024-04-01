@@ -43,7 +43,7 @@ class RenewPageController extends State<RenewPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkBorrowedBook(studentId, employeeId).then((result) {
+    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId).then((result) {
       List<BorrowedDetailDataJson> tempList = [];
       List<Map> tempConvertedList = [];
 

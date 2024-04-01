@@ -11,6 +11,7 @@ import 'package:jny_self_services_library/services/locals/functions/route_functi
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
+import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
@@ -72,7 +73,7 @@ class ReturnPageController extends State<ReturnPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkBorrowedBook(studentId, employeeId).then((result) {
+    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId).then((result) {
       List<BorrowedDetailDataJson> tempList = [];
       List<Map> tempConvertedList = [];
 
@@ -223,15 +224,36 @@ class ReturnPageController extends State<ReturnPage> {
         }
 
         if(isAccepted == true) {
-          await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) {
-            if(result == true) {
-              MoveTo(
+          List<String> epcList = [];
+
+          for(int i = 0; i < listBorrowedBooks.length; i++) {
+            if(listBorrowedBooks[i].values.first.id != null && listBorrowedBooks[i].keys.first == true && listBorrowedBooks[i].values.first.rfidTag != null) {
+              epcList.add(listBorrowedBooks[i].values.first.rfidTag!);
+            }
+          }
+
+          await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((deleteAlarmResult) async {
+            if(deleteAlarmResult == true) {
+              await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
+                if(result == true) {
+                  MoveTo(
+                    context: context,
+                    target: const ThanksPage(
+                      type: 1,
+                    ),
+                    callback: (_) => CloseBack(context: context).go(),
+                  ).go();
+                }
+              });
+            } else {
+              OkDialog(
                 context: context,
-                target: const ThanksPage(
-                  type: 1,
-                ),
-                callback: (_) => CloseBack(context: context).go(),
-              ).go();
+                content: 'Failed to communicating with gate system, please try again!',
+                headIcon: false,
+                okPressed: () async => await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
+                  closeBorrowedBooks();
+                }),
+              ).show();
             }
           });
         } else {

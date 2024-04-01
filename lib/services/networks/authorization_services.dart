@@ -16,7 +16,7 @@ class AuthorizationServices {
   Future<bool> usingPassword(String username, String password) async {
     bool result = false;
 
-    await NetworkOption.init().then((dio) async {
+    await NetworkOption.initJNYAPI().then((dio) async {
       LoadingDialog(context: context).show();
 
       await dio.post(
