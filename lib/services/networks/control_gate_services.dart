@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/networks/jsons/gate_logs_json.dart';
 import 'package:jny_self_services_library/services/networks/network_options.dart';
 
 class ControlGateServices {
@@ -77,8 +78,8 @@ class ControlGateServices {
     return result;
   }
 
-  Future<List> getGateLogs() async {
-    List result = [];
+  Future<List<GateLogsData>> getGateLogs(String? startDate, String? endDate) async {
+    List<GateLogsData> result = [];
 
     await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
       if(gateURL != null) {
@@ -87,12 +88,20 @@ class ControlGateServices {
 
           await dio.get(
             "$gateURL/logs",
+            queryParameters: {
+              "start_date": startDate,
+              "end_date": endDate,
+            },
           ).then((getResult) {
             CloseBack(context: context).go();
 
             if(getResult.statusCode == 200 || getResult.statusCode == 201) {
               if(getResult.data != null) {
-                result = getResult.data;
+                GateLogsJson gateLogsJson = getResult.data;
+
+                if(gateLogsJson.gateLogsData != null) {
+                  result = gateLogsJson.gateLogsData!;
+                }
               }
             }
           }).catchError((dioExc) {

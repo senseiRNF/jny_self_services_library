@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jny_self_services_library/controllers/alarm_gate_logs_page_controller.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
@@ -42,6 +43,23 @@ class AlarmGateSetupPageController extends State<AlarmGateSetupPage> {
         OkDialog(
           context: context,
           content: "Failed to save Server Gate URL",
+          headIcon: false,
+        ).show();
+      }
+    });
+  }
+
+  moveToAlarmLogs() async {
+    await SharedPrefsFunctions.readData("gate_url").then((gateURL) {
+      if(gateURL != null && gateURL != '') {
+        MoveTo(
+          context: context,
+          target: const AlarmGateLogsPage(),
+        ).go();
+      } else {
+        OkDialog(
+          context: context,
+          content: "Failed to open logs, please connect to server gate and try again",
           headIcon: false,
         ).show();
       }

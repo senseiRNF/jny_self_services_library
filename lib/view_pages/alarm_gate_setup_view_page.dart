@@ -16,6 +16,14 @@ class AlarmGateSetupViewPage extends StatelessWidget {
         title: const Text(
           "Alarm Gate Setup"
         ),
+        actions: [
+          IconButton(
+            onPressed: () => controller.moveToAlarmLogs(),
+            icon: const Icon(
+              Icons.list_alt,
+            ),
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
