@@ -97,7 +97,7 @@ class ControlGateServices {
 
             if(getResult.statusCode == 200 || getResult.statusCode == 201) {
               if(getResult.data != null) {
-                GateLogsJson gateLogsJson = getResult.data;
+                GateLogsJson gateLogsJson = GateLogsJson.fromJson(getResult.data);
 
                 if(gateLogsJson.gateLogsData != null) {
                   result = gateLogsJson.gateLogsData!;
