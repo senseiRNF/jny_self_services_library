@@ -440,4 +440,36 @@ class BookServices {
 
     return result;
   }
+
+  Future<String?> showUntilDate(String startDate, int duration) async {
+    String? result;
+
+    await NetworkOption.initJNYAPI().then((dio) async {
+      LoadingDialog(context: context).show();
+
+      await dio.get(
+        '/library/calendar',
+        queryParameters: {
+          "date": startDate,
+          "limit": duration,
+        },
+      ).then((getResult) {
+        CloseBack(context: context).go();
+
+        if(getResult.statusCode == 200 || getResult.statusCode == 201) {
+          if(getResult.data != null) {
+            result = getResult.data['date'];
+          }
+        }
+      }).catchError((dioExc) {
+        CloseBack(context: context).go();
+
+        if(dioExc.response != null && dioExc.response!.statusCode != 404) {
+          ErrorHandler(context: context, dioExc: dioExc).show();
+        }
+      });
+    });
+
+    return result;
+  }
 }

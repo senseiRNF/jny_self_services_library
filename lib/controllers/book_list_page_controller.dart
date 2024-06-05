@@ -131,10 +131,11 @@ class BookListPageController extends State<BookListPage> {
               }
             }
 
-            if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                (subjectMatch == true && bookList[i].languageId == selectedLanguage.id!)) {
-              tempQueryBookList.add(bookList[i]);
+            if(subjectMatch == true && bookList[i].languageId == selectedLanguage.id!) {
+              if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
+                  bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
+                tempQueryBookList.add(bookList[i]);
+              }
             }
           }
         } else if(selectedSubject.id != 0) {
@@ -148,18 +149,20 @@ class BookListPageController extends State<BookListPage> {
               }
             }
 
-            if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                subjectMatch == true) {
-              tempQueryBookList.add(bookList[i]);
+            if(subjectMatch == true) {
+              if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
+                  bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
+                tempQueryBookList.add(bookList[i]);
+              }
             }
           }
         } else if(selectedLanguage.id != 0) {
           if(bookList[i].title != null && bookList[i].authorNames != null && bookList[i].languageId != null) {
-            if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                bookList[i].languageId == selectedLanguage.id!) {
-              tempQueryBookList.add(bookList[i]);
+            if(bookList[i].languageId == selectedLanguage.id!) {
+              if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
+                  bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
+                tempQueryBookList.add(bookList[i]);
+              }
             }
           }
         } else {

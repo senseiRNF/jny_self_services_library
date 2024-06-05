@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/account_page_controller.dart';
 import 'package:jny_self_services_library/controllers/book_list_page_controller.dart';
 import 'package:jny_self_services_library/controllers/borrow_page_controller.dart';
+import 'package:jny_self_services_library/controllers/library_information_page_controller.dart';
 import 'package:jny_self_services_library/controllers/lock_setting_page_controller.dart';
 import 'package:jny_self_services_library/controllers/qr_scan_page_controller.dart';
 import 'package:jny_self_services_library/controllers/renew_page_controller.dart';
@@ -25,7 +26,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageController extends State<HomePage> {
-  List<HomeMenuJson> homeMenu = [];
+  late List<HomeMenuJson> homeMenu;
   List<Widget> carouselWidget = [];
 
   bool isOnScreensaver = true;
@@ -333,7 +334,7 @@ class HomePageController extends State<HomePage> {
           },
         ),
         HomeMenuJson(
-          menuTitle: 'Search Book',
+          menuTitle: 'Book Search',
           menuIcon: 'assets/images/icons/search.png',
           onPressed: () {
             if(gestureTimer != null) {
@@ -345,6 +346,40 @@ class HomePageController extends State<HomePage> {
             MoveTo(
               context: context,
               target: const BookListPage(),
+              callback: (_) {
+                if(gestureTimer != null && gestureTimer!.isActive == false) {
+                  setState(() {
+                    gestureTimer = Timer.periodic(
+                      const Duration(seconds: 1), (timer) =>
+                        checkTimeout(timer.tick),
+                    );
+                  });
+                }
+
+                DisplayMonitorServices.sendStateToMonitor(
+                  "IDLE",
+                  {
+                    "library_member": {},
+                    "book_list": {},
+                  },
+                );
+              },
+            ).go();
+          },
+        ),
+        HomeMenuJson(
+          menuTitle: 'Library Information',
+          menuIcon: 'assets/images/icons/information.png',
+          onPressed: () {
+            if(gestureTimer != null) {
+              setState(() {
+                gestureTimer!.cancel();
+              });
+            }
+
+            MoveTo(
+              context: context,
+              target: const LibraryInformationPage(),
               callback: (_) {
                 if(gestureTimer != null && gestureTimer!.isActive == false) {
                   setState(() {

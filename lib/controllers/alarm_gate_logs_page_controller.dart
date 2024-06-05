@@ -14,6 +14,8 @@ class AlarmGateLogsPage extends StatefulWidget {
 class AlarmGateLogsPageController extends State<AlarmGateLogsPage> {
   List<GateLogsData> gateLogsDataList = [];
 
+  bool isAscending = true;
+
   DateTime startDate = DateTime(
     DateTime.now().year,
     DateTime.now().month,
@@ -29,6 +31,7 @@ class AlarmGateLogsPageController extends State<AlarmGateLogsPage> {
     await ControlGateServices(context: context).getGateLogs(
       DateFormat("yyyy-MM-dd").format(startDate),
       DateFormat("yyyy-MM-dd").format(endDate),
+      isAscending,
     ).then((result) {
       setState(() {
         gateLogsDataList = result;
@@ -56,6 +59,10 @@ class AlarmGateLogsPageController extends State<AlarmGateLogsPage> {
       }
     });
   }
+
+  changeSort() => setState(() {
+    isAscending = !isAscending;
+  });
 
   @override
   void initState() {

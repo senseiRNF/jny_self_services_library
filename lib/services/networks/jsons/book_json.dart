@@ -62,6 +62,7 @@ class BookDataJson {
   String? languageName;
   bool? isAvailable;
   String? rfidTag;
+  String? shelfLocation;
   String? code;
   String? location;
   String? type;
@@ -80,6 +81,7 @@ class BookDataJson {
     this.languageName,
     this.isAvailable,
     this.rfidTag,
+    this.shelfLocation,
     this.code,
     this.location,
     this.type,
@@ -99,6 +101,7 @@ class BookDataJson {
     languageName = json['language_name'];
     isAvailable = json['is_available'];
     rfidTag = json['rfid_tag'];
+    shelfLocation = json['shelf_location'];
     code = json['code'];
     location = json['location'];
     type = json['type'];
@@ -119,6 +122,7 @@ class BookDataJson {
     data['language_name'] = languageName;
     data['is_available'] = isAvailable;
     data['rfid_tag'] = rfidTag;
+    data['shelf_location'] = shelfLocation;
     data['code'] = code;
     data['location'] = location;
     data['type'] = type;

@@ -280,7 +280,7 @@ class BorrowViewPage extends StatelessWidget {
                       ),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () => controller.borrowBook(),
+                          onPressed: () => controller.checkIfStudentBorrow(),
                           style: ElevatedButton.styleFrom(
                             elevation: 10.0,
                           ),

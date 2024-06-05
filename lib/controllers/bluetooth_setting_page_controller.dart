@@ -173,9 +173,9 @@ class BluetoothSettingPageController extends State<BluetoothSettingPage> {
     await device.connect(
       autoConnect: false,
       timeout: const Duration(seconds: 10),
-    ).then((_) {
+    ).then((_) async {
       if(device.isConnected) {
-        SharedPrefsFunctions.writeData(
+        await SharedPrefsFunctions.writeData(
           'bluetooth',
           jsonEncode(
             LocalBluetoothJson(

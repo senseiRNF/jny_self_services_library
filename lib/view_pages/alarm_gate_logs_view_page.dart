@@ -67,6 +67,25 @@ class AlarmGateLogsViewPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(
+                  width: 10.0,
+                ),
+                Column(
+                  children: [
+                    const Text(
+                      "Sort",
+                      style: TextStyle(
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => controller.changeSort(),
+                      child: Icon(
+                        controller.isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                      ),
+                    ),
+                  ],
+                ),
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
                   child: IconButton(

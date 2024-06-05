@@ -72,7 +72,11 @@ class CheckBookAlarmSettingViewPage extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Text(
-                  'Location: ${controller.bookDataJson!.location ?? 'Unknown'}',
+                  'Location: ${controller.bookDataJson!.location ?? '-'}',
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  'Shelf Location: ${controller.bookDataJson!.shelfLocation ?? '-'}',
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(

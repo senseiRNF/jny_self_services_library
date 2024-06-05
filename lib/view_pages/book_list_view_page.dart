@@ -15,7 +15,7 @@ class BookListViewPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Search Book",
+          "Book Search",
         ),
       ),
       body: Column(
@@ -256,7 +256,23 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].location ?? 'Unknown',
+                                          controller.queryBookList[index].location ?? '-',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Shelf Location: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.queryBookList[index].shelfLocation ?? '-',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),

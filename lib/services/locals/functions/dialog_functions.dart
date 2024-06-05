@@ -197,64 +197,40 @@ class ErrorHandler {
           serverErrMessage = dioExc.response!.data!['message'];
         }
       }
+    }
 
+    if(serverErrMessage != null) {
+      errMessage = serverErrMessage;
+    } else {
       switch(errCode) {
         case 400:
-          if(serverErrMessage != null) {
-            errMessage = '(400) Bad request. \n\n$serverErrMessage';
-          } else {
-            errMessage = '(400) Bad request. Please try again!';
-          }
+          errMessage = 'Bad request. Please try again!';
           break;
         case 401:
-          if(serverErrMessage != null) {
-            errMessage = '(401) Unauthorized action. \n\n$serverErrMessage';
-          } else {
-            errMessage = '(401) Unauthorized action. Please try again!';
-          }
+          errMessage = 'Unauthorized action. Please try again!';
           break;
         case 404:
-          if(serverErrMessage != null) {
-            errMessage = '(404) Request not found. \n\n$serverErrMessage';
-          } else {
-            errMessage = '(404) Request not found. For more information, please contact administrator!';
-          }
+          errMessage = 'Request not found. For more information, please contact administrator!';
           break;
         case 422:
-          if(serverErrMessage != null) {
-            errMessage = '(422) Invalid input request. ${'\n\n$serverErrMessage\n\n'}Please check all submitted data and try again!';
-          } else {
-            errMessage = '(422) Invalid input request. Please check all submitted data and try again!';
-          }
+          errMessage = 'Invalid input request. Please check all submitted data and try again!';
           break;
         case 500:
-          if(serverErrMessage != null) {
-            errMessage = '(500) Internal server error. \n\n$serverErrMessage';
-          } else {
-            errMessage = '(500) Internal server error. For more information, please contact administrator!';
-          }
+          errMessage = 'Internal server error. For more information, please contact administrator!';
           break;
         case 599:
-          if(serverErrMessage != null) {
-            errMessage = "(599) Unknown status. \n\n$serverErrMessage";
-          } else {
-            errMessage = "(599) Unknown status. Unable to access this menu because it's under maintenance. For more information, please contact administrator!";
-          }
+          errMessage = "Unknown status. Unable to access this menu because it's under maintenance. For more information, please contact administrator!";
           break;
         default:
-          if(serverErrMessage != null) {
-            errMessage = '${dioExc.response!.statusCode != null ? "(${dioExc.response!.statusCode!}) " : ""}Unknown error. \n\n$serverErrMessage';
-          } else {
-            errMessage = '${dioExc.response!.statusCode != null ? "(${dioExc.response!.statusCode!}) " : ""}Unknown error. For more information, please contact administrator!';
-          }
+          errMessage = 'Connection failed. Please check your internet connection';
           break;
       }
-
-      OkDialog(
-        context: context,
-        content: errMessage,
-        headIcon: false,
-      ).show();
     }
+
+    OkDialog(
+      context: context,
+      content: errMessage,
+      headIcon: false,
+    ).show();
   }
 }

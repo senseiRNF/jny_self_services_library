@@ -78,7 +78,7 @@ class ControlGateServices {
     return result;
   }
 
-  Future<List<GateLogsData>> getGateLogs(String? startDate, String? endDate) async {
+  Future<List<GateLogsData>> getGateLogs(String? startDate, String? endDate, bool isAscending) async {
     List<GateLogsData> result = [];
 
     await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
@@ -91,6 +91,7 @@ class ControlGateServices {
             queryParameters: {
               "start_date": startDate,
               "end_date": endDate,
+              "order": isAscending == true ? "asc" : "desc",
             },
           ).then((getResult) {
             CloseBack(context: context).go();

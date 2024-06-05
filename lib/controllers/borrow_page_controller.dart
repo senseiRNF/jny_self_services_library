@@ -43,32 +43,62 @@ class BorrowPageController extends State<BorrowPage> {
 
   BluetoothDevice? connectedDevice;
 
+  String fromDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  String untilDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
   @override
   void initState() {
     super.initState();
 
-    checkConnection().then((_) {
-      if(connectedDevice != null) {
-        if(isOnListen == false) {
-          startRFIDAuto();
-        }
-      } else {
-        OkDialog(
-          context: context,
-          content: 'Bluetooth not connected!',
-          headIcon: false,
-          okPressed: () => CloseBack(context: context).go(),
-        ).show();
-      }
-    });
+    if(widget.libraryMemberData.nis != null) {
+      checkUntilDate().then((_) {
+        checkConnection().then((_) {
+          if(connectedDevice != null) {
+            if(isOnListen == false) {
+              startRFIDAuto();
+            }
+          } else {
+            OkDialog(
+              context: context,
+              content: 'Bluetooth not connected!',
+              headIcon: false,
+              okPressed: () => CloseBack(context: context).go(),
+            ).show();
+          }
+        });
 
-    DisplayMonitorServices.sendStateToMonitor(
-      "READ_RFID",
-      {
-        "library_member": widget.libraryMemberData.toJson(),
-        "book_list": {},
-      },
-    );
+        DisplayMonitorServices.sendStateToMonitor(
+          "READ_RFID",
+          {
+            "library_member": widget.libraryMemberData.toJson(),
+            "book_list": {},
+          },
+        );
+      });
+    } else if(widget.libraryMemberData.nik != null) {
+      checkConnection().then((_) {
+        if(connectedDevice != null) {
+          if(isOnListen == false) {
+            startRFIDAuto();
+          }
+        } else {
+          OkDialog(
+            context: context,
+            content: 'Bluetooth not connected!',
+            headIcon: false,
+            okPressed: () => CloseBack(context: context).go(),
+          ).show();
+        }
+      });
+
+      DisplayMonitorServices.sendStateToMonitor(
+        "READ_RFID",
+        {
+          "library_member": widget.libraryMemberData.toJson(),
+          "book_list": {},
+        },
+      );
+    }
   }
 
   Future checkConnection() async {
@@ -79,6 +109,16 @@ class BorrowPageController extends State<BorrowPage> {
         if(btJson.bluetoothRemoteId != null) {
           connectedDevice = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!));
         }
+      }
+    });
+  }
+
+  checkUntilDate() async {
+    await BookServices(context: context).showUntilDate(fromDate, 7).then((dateResult) {
+      if(dateResult != null) {
+        setState(() {
+          untilDate = dateResult;
+        });
       }
     });
   }
@@ -152,9 +192,6 @@ class BorrowPageController extends State<BorrowPage> {
     } else if(widget.libraryMemberData.nik != null) {
       employeeId = widget.libraryMemberData.id!.toString();
     }
-
-    String fromDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-    String untilDate = DateFormat("yyyy-MM-dd").format(DateTime.now().add(const Duration(days: 7)));
 
     String itemList = "";
 
@@ -238,11 +275,9 @@ class BorrowPageController extends State<BorrowPage> {
 
         OkDialog(
           context: context,
-          content: 'Failed to Borrow!\n\nPlease do not remove books from Scanner before process is completed',
+          content: 'Please do not remove books from Scanner before process is completed!',
           headIcon: false,
-          okPressed: () {
-            startRFIDAuto();
-          },
+          okPressed: () => startRFIDAuto(),
         ).show();
       }
     });
@@ -261,6 +296,37 @@ class BorrowPageController extends State<BorrowPage> {
         "book_list": {},
       },
     );
+  }
+
+  checkIfStudentBorrow() {
+    if(widget.libraryMemberData.nis != null) {
+      borrowBook();
+    } else if(widget.libraryMemberData.nik != null) {
+      OkDialog(
+        context: context,
+        content: "Select return date before proceed",
+        okPressed: () => showDatePicker(
+          context: context,
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2080),
+          helpText: "RETURN DATE",
+        ).then((datePicked) {
+          if(datePicked != null) {
+            setState(() {
+              untilDate = DateFormat("yyyy-MM-dd").format(datePicked);
+            });
+
+            borrowBook();
+          } else {
+            OkDialog(
+              context: context,
+              content: 'Please select returning date before proceed',
+              headIcon: false,
+            ).show();
+          }
+        }),
+      ).show();
+    }
   }
 
   @override
