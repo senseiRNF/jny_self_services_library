@@ -5,6 +5,7 @@ import 'package:jny_self_services_library/controllers/check_book_alarm_setting_p
 import 'package:jny_self_services_library/controllers/lock_setting_page_controller.dart';
 import 'package:jny_self_services_library/controllers/monitor_setup_page_controller.dart';
 import 'package:jny_self_services_library/controllers/splash_page_controller.dart';
+import 'package:jny_self_services_library/controllers/health_check_page_controller.dart';
 import 'package:jny_self_services_library/services/locals/bridging_channel/method_channel_native.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
@@ -114,6 +115,11 @@ class SettingPageController extends State<SettingPage> {
   setupServerGateURL() => MoveTo(
     context: context,
     target: const AlarmGateSetupPage(),
+  ).go();
+
+  openHealthCheck() => MoveTo(
+    context: context,
+    target: const HealthCheckPage(),
   ).go();
 
   signOut() => OptionDialog(

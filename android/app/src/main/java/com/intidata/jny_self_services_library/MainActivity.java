@@ -250,6 +250,7 @@ public class MainActivity extends FlutterActivity {
                     mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
                     uhf.init(getApplicationContext());
+                    uhf.setBeep(false);
 
                     result.success(true);
                     break;

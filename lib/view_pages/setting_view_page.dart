@@ -256,6 +256,44 @@ class SettingViewPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(5.0),
               ),
               child: InkWell(
+                onTap: () => controller.openHealthCheck(),
+                customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5.0),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Health Check',
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10.0,
+                      ),
+                      Icon(
+                        Icons.navigate_next,
+                        size: 35.0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(
+            height: 10.0,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Card(
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: InkWell(
                 onTap: () => controller.signOut(),
                 customBorder: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5.0),

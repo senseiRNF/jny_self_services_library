@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
@@ -104,6 +105,41 @@ class ControlGateServices {
                   result = gateLogsJson.gateLogsData!;
                 }
               }
+            }
+          }).catchError((dioExc) {
+            CloseBack(context: context).go();
+
+            if(dioExc.response != null && dioExc.response!.statusCode != 404) {
+              ErrorHandler(context: context, dioExc: dioExc).show();
+            }
+          });
+        });
+      }
+    });
+
+    return result;
+  }
+
+  Future<bool> checkGateConnections() async {
+    bool result = false;
+
+    await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
+      if(gateURL != null) {
+        await NetworkOption.initNoAPI().then((dio) async {
+          LoadingDialog(context: context).show();
+
+          await dio.get(
+            "$gateURL/logs",
+            queryParameters: {
+              "start_date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
+              "end_date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
+              "order": "asc",
+            },
+          ).then((getResult) {
+            CloseBack(context: context).go();
+
+            if(getResult.statusCode == 200 || getResult.statusCode == 201) {
+              result = true;
             }
           }).catchError((dioExc) {
             CloseBack(context: context).go();

@@ -298,6 +298,12 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
         ],
       },
     },
+    {
+      "INFORMATION": {
+        "library_member": {},
+        "book_list": {},
+      },
+    },
   ];
 
   @override

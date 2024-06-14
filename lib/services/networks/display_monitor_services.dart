@@ -18,4 +18,18 @@ class DisplayMonitorServices {
       }
     });
   }
+
+  static Future<bool> checkMonitorConnections() async {
+    bool result = false;
+
+    PocketBase pbConfig = PocketBaseConfig.pb;
+
+    await SharedPrefsFunctions.readData('pairingID').then((pairingIDResult) {
+      pbConfig.collection("testing").getFullList().then((pbResult) {
+        result = true;
+      });
+    });
+
+    return result;
+  }
 }
