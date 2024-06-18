@@ -22,13 +22,16 @@ class LibraryInformationPageController extends State<LibraryInformationPage> {
     for(int i = 2; i < 9; i++) {
       setState(() {
         libraryFacilityList.add(
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(
-                  "assets/images/library_info_$i.png",
+          InkWell(
+            onTap: () => showFullImage('assets/images/library_info_$i.png'),
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(
+                    "assets/images/library_info_$i.png",
+                  ),
+                  fit: BoxFit.cover,
                 ),
-                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -54,6 +57,59 @@ class LibraryInformationPageController extends State<LibraryInformationPage> {
   });
 
   onBackPressed() => CloseBack(context: context).go();
+
+  showFullImage(String assetPath) => showDialog(
+    context: context,
+    builder: (dialogContext) {
+      String selectedAsset;
+
+      switch(assetPath) {
+        case "assets/images/library_info_1.jpeg":
+          selectedAsset = "INFO_1";
+          break;
+        case "assets/images/library_info_2.png":
+          selectedAsset = "INFO_2";
+          break;
+        case "assets/images/library_info_3.png":
+          selectedAsset = "INFO_3";
+          break;
+        case "assets/images/library_info_4.png":
+          selectedAsset = "INFO_4";
+          break;
+        case "assets/images/library_info_5.png":
+          selectedAsset = "INFO_5";
+          break;
+        case "assets/images/library_info_6.png":
+          selectedAsset = "INFO_6";
+          break;
+        case "assets/images/library_info_7.png":
+          selectedAsset = "INFO_7";
+          break;
+        case "assets/images/library_info_8.png":
+          selectedAsset = "INFO_8";
+          break;
+        default:
+          selectedAsset = "INFORMATION";
+          break;
+      }
+
+      DisplayMonitorServices.sendStateToMonitor(
+        selectedAsset,
+        {
+          "library_member": {},
+          "book_list": {},
+        },
+      );
+
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        child: Image.asset(
+          assetPath,
+          fit: BoxFit.cover,
+        ),
+      );
+    },
+  ).then((_) => loadLibraryInformation());
 
   @override
   Widget build(BuildContext context) {
