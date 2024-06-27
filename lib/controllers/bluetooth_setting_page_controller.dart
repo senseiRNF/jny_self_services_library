@@ -183,36 +183,36 @@ class BluetoothSettingPageController extends State<BluetoothSettingPage> {
               bluetoothName: device.platformName,
             ).toJson(),
           ),
-        );
-
-        setState(() {
-          connectedDevice = device;
-        });
-
-        MethodChannelNative(context: context).setDeviceToNative(device.remoteId.str);
-
-        if(btConnectionStateSubscription == null) {
+        ).then((_) {
           setState(() {
-            btConnectionStateSubscription = device.connectionState.listen((state) async {
-              if(state == BluetoothConnectionState.disconnected) {
-                await device.connect(
-                  autoConnect: false,
-                  timeout: const Duration(seconds: 10),
-                ).then((_) {
-                  if(device.isConnected) {
-                    setState(() {
-                      connectedDevice = device;
-                    });
-
-                    MethodChannelNative(context: context).setDeviceToNative(device.remoteId.str).then((_) {
-                      CloseBack(context: context).go();
-                    });
-                  }
-                });
-              }
-            });
+            connectedDevice = device;
           });
-        }
+
+          MethodChannelNative(context: context).setDeviceToNative(device.remoteId.str);
+
+          if(btConnectionStateSubscription == null) {
+            setState(() {
+              btConnectionStateSubscription = device.connectionState.listen((state) async {
+                if(state == BluetoothConnectionState.disconnected) {
+                  await device.connect(
+                    autoConnect: false,
+                    timeout: const Duration(seconds: 10),
+                  ).then((_) {
+                    if(device.isConnected) {
+                      setState(() {
+                        connectedDevice = device;
+                      });
+
+                      MethodChannelNative(context: context).setDeviceToNative(device.remoteId.str).then((_) {
+                        CloseBack(context: context).go();
+                      });
+                    }
+                  });
+                }
+              });
+            });
+          }
+        });
       }
     }).catchError((err) {
       OkDialog(

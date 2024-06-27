@@ -6,8 +6,8 @@ import 'package:jny_self_services_library/services/locals/functions/dialog_funct
 import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_account_json.dart';
+import 'package:jny_self_services_library/services/networks/jsons/book_history_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
-import 'package:jny_self_services_library/services/networks/jsons/borrow_history_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/language_list_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/subjects_list_json.dart';
@@ -18,7 +18,7 @@ class BookServices {
 
   BookServices({required this.context});
 
-  Future<List<BookDataJson>> showAllBook() async {
+  Future<List<BookDataJson>> showBookByFilter(String parameter) async {
     List<BookDataJson> result = [];
     LocalAccountJson? account;
 
@@ -32,6 +32,9 @@ class BookServices {
 
         await dio.get(
           '/library/books',
+          queryParameters: {
+            "keyword": parameter,
+          },
           options: Options(
             headers: {
               'Authorization': 'Bearer ${account?.accessToken}',
@@ -155,9 +158,24 @@ class BookServices {
     return result;
   }
 
-  Future<BorrowedDetailJson?> checkCurrentBorrow(String? studentId, String? employeeId) async {
+  Future<BorrowedDetailJson?> checkCurrentBorrow(String? studentId, String? employeeId, String? status) async {
     BorrowedDetailJson? result;
     LocalAccountJson? account;
+
+    Map<String, String> query =
+    studentId != null ? status != null ? {
+      'student_id': studentId,
+      'status': status,
+    } :  {
+      'student_id': studentId,
+    } :
+    employeeId != null ? status != null ? {
+      'employee_id': employeeId,
+      'status': status,
+    } :
+    {
+      'employee_id': employeeId,
+    } : {};
 
     await SharedPrefsFunctions.readData('account').then((accountResult) async {
       if(accountResult != null) {
@@ -169,11 +187,7 @@ class BookServices {
 
         await dio.get(
           '/library/loan',
-          queryParameters: studentId != null ? {
-            'student_id': studentId,
-          } : employeeId != null ? {
-            'employee_id': employeeId,
-          } : {},
+          queryParameters: query,
           options: Options(
             headers: {
               'Authorization': 'Bearer ${account?.accessToken}',
@@ -200,60 +214,60 @@ class BookServices {
     return result;
   }
 
-  Future<List<BorrowHistoryDataJson>> showHistoryBorrow(String? studentId, String? employeeId) async {
-    List<BorrowHistoryDataJson> result = [];
-    LocalAccountJson? account;
+  // Future<List<BorrowHistoryDataJson>> showHistoryBorrow(String? studentId, String? employeeId) async {
+  //   List<BorrowHistoryDataJson> result = [];
+  //   LocalAccountJson? account;
+  //
+  //   await SharedPrefsFunctions.readData('account').then((accountResult) async {
+  //     if(accountResult != null) {
+  //       account = LocalAccountJson.fromJson(jsonDecode(accountResult));
+  //     }
+  //
+  //     await NetworkOption.initJNYAPI().then((dio) async {
+  //       LoadingDialog(context: context).show();
+  //
+  //       await dio.get(
+  //         '/library/loan-histories',
+  //         queryParameters: studentId != null ? {
+  //           'student_id': studentId,
+  //           'limit': 5,
+  //         } : employeeId != null ? {
+  //           'employee_id': employeeId,
+  //           'limit': 5,
+  //         } : {},
+  //         options: Options(
+  //           headers: {
+  //             'Authorization': 'Bearer ${account?.accessToken}',
+  //           },
+  //         ),
+  //       ).then((getResult) {
+  //         CloseBack(context: context).go();
+  //
+  //         if(getResult.statusCode == 200 || getResult.statusCode == 201) {
+  //           if(getResult.data != null) {
+  //             BorrowHistoryJson borrowHistoryJson = BorrowHistoryJson.fromJson(getResult.data!);
+  //
+  //             if(borrowHistoryJson.borrowHistoryDataJson != null) {
+  //               for(int i = 0; i < borrowHistoryJson.borrowHistoryDataJson!.length; i++) {
+  //                 result.add(borrowHistoryJson.borrowHistoryDataJson![i]);
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }).catchError((dioExc) {
+  //         CloseBack(context: context).go();
+  //
+  //         if(dioExc.response != null && dioExc.response!.statusCode != 404) {
+  //           ErrorHandler(context: context, dioExc: dioExc).show();
+  //         }
+  //       });
+  //     });
+  //   });
+  //
+  //   return result;
+  // }
 
-    await SharedPrefsFunctions.readData('account').then((accountResult) async {
-      if(accountResult != null) {
-        account = LocalAccountJson.fromJson(jsonDecode(accountResult));
-      }
-
-      await NetworkOption.initJNYAPI().then((dio) async {
-        LoadingDialog(context: context).show();
-
-        await dio.get(
-          '/library/loan-history',
-          queryParameters: studentId != null ? {
-            'student_id': studentId,
-            'limit': 3,
-          } : employeeId != null ? {
-            'employee_id': employeeId,
-            'limit': 3,
-          } : {},
-          options: Options(
-            headers: {
-              'Authorization': 'Bearer ${account?.accessToken}',
-            },
-          ),
-        ).then((getResult) {
-          CloseBack(context: context).go();
-
-          if(getResult.statusCode == 200 || getResult.statusCode == 201) {
-            if(getResult.data != null) {
-              BorrowHistoryJson borrowHistoryJson = BorrowHistoryJson.fromJson(getResult.data!);
-
-              if(borrowHistoryJson.borrowHistoryDataJson != null) {
-                for(int i = 0; i < borrowHistoryJson.borrowHistoryDataJson!.length; i++) {
-                  result.add(borrowHistoryJson.borrowHistoryDataJson![i]);
-                }
-              }
-            }
-          }
-        }).catchError((dioExc) {
-          CloseBack(context: context).go();
-
-          if(dioExc.response != null && dioExc.response!.statusCode != 404) {
-            ErrorHandler(context: context, dioExc: dioExc).show();
-          }
-        });
-      });
-    });
-
-    return result;
-  }
-
-  Future<bool> extendPeriodBook(int borrowId, String untilDate, String itemList, String? studentId, String? employeeId) async {
+  Future<bool> extendPeriodBook(int? borrowId, String untilDate, String? itemList, String? studentId, String? employeeId) async {
     bool result = false;
     LocalAccountJson? account;
 
@@ -303,7 +317,7 @@ class BookServices {
     return result;
   }
 
-  Future<bool> returnBook(int borrowId, String returnDate, String itemList, String? studentId, String? employeeId) async {
+  Future<bool> returnBook(int? borrowId, String returnDate, String? itemList, String? studentId, String? employeeId) async {
     bool result = false;
     LocalAccountJson? account;
 
@@ -467,6 +481,47 @@ class BookServices {
         if(dioExc.response != null && dioExc.response!.statusCode != 404) {
           ErrorHandler(context: context, dioExc: dioExc).show();
         }
+      });
+    });
+
+    return result;
+  }
+
+  Future<BookHistoryDataJson?> showBookHistory(String rfid) async {
+    BookHistoryDataJson? result;
+    LocalAccountJson? account;
+
+    await SharedPrefsFunctions.readData('account').then((accountResult) async {
+      if(accountResult != null) {
+        account = LocalAccountJson.fromJson(jsonDecode(accountResult));
+      }
+
+      await NetworkOption.initJNYAPI().then((dio) async {
+        await dio.get(
+          '/library/book-loan-histories/$rfid',
+          queryParameters: {
+            'type': 'rfid',
+          },
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer ${account?.accessToken}',
+            },
+          ),
+        ).then((getResult) {
+          if(getResult.statusCode == 200 || getResult.statusCode == 201) {
+            if(getResult.data != null) {
+              BookHistoryJson bookHistoryJson = BookHistoryJson.fromJson(getResult.data);
+
+              if(bookHistoryJson.bookHistoryDataJson != null) {
+                result = bookHistoryJson.bookHistoryDataJson!;
+              }
+            }
+          }
+        }).catchError((dioExc) {
+          if(dioExc.response != null && dioExc.response!.statusCode != 404) {
+            ErrorHandler(context: context, dioExc: dioExc).show();
+          }
+        });
       });
     });
 

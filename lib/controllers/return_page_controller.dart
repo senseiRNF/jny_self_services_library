@@ -11,7 +11,7 @@ import 'package:jny_self_services_library/services/locals/functions/route_functi
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
-import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
+// import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
@@ -31,7 +31,6 @@ class ReturnPage extends StatefulWidget {
 
 class ReturnPageController extends State<ReturnPage> {
   int countScannedRFID = 0;
-  int? borrowId;
 
   bool isOnListen = false;
   bool isAbleToProceed = false;
@@ -41,6 +40,8 @@ class ReturnPageController extends State<ReturnPage> {
   List scannedRFID = [];
   List<BorrowedDetailDataJson> listBorrowedDetail = [];
   List<Map<bool, BorrowedBooksDataJson>> listBorrowedBooks = [];
+
+  BorrowedDetailDataJson? selectedBorrowedDetail;
 
   BluetoothDevice? connectedDevice;
 
@@ -73,7 +74,7 @@ class ReturnPageController extends State<ReturnPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId).then((result) {
+    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId, "on loan").then((result) {
       List<BorrowedDetailDataJson> tempList = [];
       List<Map> tempConvertedList = [];
 
@@ -232,28 +233,40 @@ class ReturnPageController extends State<ReturnPage> {
             }
           }
 
-          await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((deleteAlarmResult) async {
-            if(deleteAlarmResult == true) {
-              await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
-                if(result == true) {
-                  MoveTo(
-                    context: context,
-                    target: const ThanksPage(
-                      type: 1,
-                    ),
-                    callback: (_) => CloseBack(context: context).go(),
-                  ).go();
-                }
-              });
-            } else {
-              OkDialog(
+          // await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((deleteAlarmResult) async {
+          //   if(deleteAlarmResult == true) {
+          //     await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
+          //       if(result == true) {
+          //         MoveTo(
+          //           context: context,
+          //           target: const ThanksPage(
+          //             type: 1,
+          //           ),
+          //           callback: (_) => CloseBack(context: context).go(),
+          //         ).go();
+          //       }
+          //     });
+          //   } else {
+          //     OkDialog(
+          //       context: context,
+          //       content: 'Failed to communicating with gate system, please try again!',
+          //       headIcon: false,
+          //       okPressed: () async => await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
+          //         closeBorrowedBooks();
+          //       }),
+          //     ).show();
+          //   }
+          // });
+
+          await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
+            if(result == true) {
+              MoveTo(
                 context: context,
-                content: 'Failed to communicating with gate system, please try again!',
-                headIcon: false,
-                okPressed: () async => await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
-                  closeBorrowedBooks();
-                }),
-              ).show();
+                target: const ThanksPage(
+                  type: 1,
+                ),
+                callback: (_) => CloseBack(context: context).go(),
+              ).go();
             }
           });
         } else {
@@ -281,21 +294,23 @@ class ReturnPageController extends State<ReturnPage> {
     }
   }
 
-  showBorrowedBooks(int id, List<BorrowedBooksDataJson> listBooks) {
+  showBorrowedBooks(BorrowedDetailDataJson borrowedDetail) {
     List<Map<bool, BorrowedBooksDataJson>> tempList = [];
     List<Map> tempConvertedList = [];
 
-    for(int i = 0; i < listBooks.length; i++) {
-      tempList.add({false: listBooks[i]});
-      tempConvertedList.add({
-        "scanned": false,
-        "book_data": listBooks[i].toJson(),
-      });
+    if(borrowedDetail.books != null) {
+      for(int i = 0; i < borrowedDetail.books!.length; i++) {
+        tempList.add({false: borrowedDetail.books![i]});
+        tempConvertedList.add({
+          "scanned": false,
+          "book_data": borrowedDetail.books![i].toJson(),
+        });
+      }
     }
 
     setState(() {
       listBorrowedBooks = tempList;
-      borrowId = id;
+      selectedBorrowedDetail = borrowedDetail;
     });
 
     checkConnection().then((_) {
@@ -329,7 +344,7 @@ class ReturnPageController extends State<ReturnPage> {
       listBorrowedBooks.clear();
       scannedRFID.clear();
       isAbleToProceed = false;
-      borrowId = null;
+      selectedBorrowedDetail = null;
 
       if(isOnListen == true) {
         isOnListen = false;
@@ -339,6 +354,38 @@ class ReturnPageController extends State<ReturnPage> {
     });
 
     checkBorrowedBook();
+  }
+
+  clearScannedRFIDList() {
+    setState(() {
+      listBorrowedBooks.clear();
+      scannedRFID.clear();
+    });
+
+    List<Map<bool, BorrowedBooksDataJson>> tempList = [];
+    List<Map> tempConvertedList = [];
+
+    if(selectedBorrowedDetail != null && selectedBorrowedDetail!.books != null) {
+      for(int i = 0; i < selectedBorrowedDetail!.books!.length; i++) {
+        tempList.add({false: selectedBorrowedDetail!.books![i]});
+        tempConvertedList.add({
+          "scanned": false,
+          "book_data": selectedBorrowedDetail!.books![i].toJson(),
+        });
+      }
+    }
+
+    setState(() {
+      listBorrowedBooks = tempList;
+    });
+
+    DisplayMonitorServices.sendStateToMonitor(
+      "SHOW_RETURN",
+      {
+        "library_member": widget.libraryMemberData.toJson(),
+        "book_list": tempConvertedList,
+      },
+    );
   }
 
   @override

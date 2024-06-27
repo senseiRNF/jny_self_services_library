@@ -114,7 +114,7 @@ class BorrowPageController extends State<BorrowPage> {
   }
 
   checkUntilDate() async {
-    await BookServices(context: context).showUntilDate(fromDate, 7).then((dateResult) {
+    await BookServices(context: context).showUntilDate(fromDate, 14).then((dateResult) {
       if(dateResult != null) {
         setState(() {
           untilDate = dateResult;
@@ -140,7 +140,7 @@ class BorrowPageController extends State<BorrowPage> {
           });
 
           await BookServices(context: context).showBookByRFID(data.toString().substring(0, 16)).then((bookResult) {
-            if(bookResult != null) {
+            if(bookResult != null && bookResult.isAvailable == true) {
               setState(() {
                 bookDataList.add(bookResult);
               });
@@ -241,30 +241,46 @@ class BorrowPageController extends State<BorrowPage> {
           }
         }
 
-        await ControlGateServices(context: context).postAlarmToGate(epcList).then((postAlarmResult) async {
-          if(postAlarmResult == true) {
-            await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
-              if(result == true) {
-                MoveTo(
-                  context: context,
-                  target: const ThanksPage(
-                    type: 0,
-                  ),
-                  callback: (_) => CloseBack(context: context).go(),
-                ).go();
-              } else {
-                await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
-                  startRFIDAuto();
-                });
-              }
-            });
-          } else {
-            OkDialog(
+        // await ControlGateServices(context: context).postAlarmToGate(epcList).then((postAlarmResult) async {
+        //   if(postAlarmResult == true) {
+        //     await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
+        //       if(result == true) {
+        //         MoveTo(
+        //           context: context,
+        //           target: const ThanksPage(
+        //             type: 0,
+        //           ),
+        //           callback: (_) => CloseBack(context: context).go(),
+        //         ).go();
+        //       } else {
+        //         await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
+        //           startRFIDAuto();
+        //         });
+        //       }
+        //     });
+        //   } else {
+        //     OkDialog(
+        //       context: context,
+        //       content: 'Failed to communicating with gate system, please try again!',
+        //       headIcon: false,
+        //       okPressed: () => {},
+        //     ).show();
+        //   }
+        // });
+
+        await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
+          if(result == true) {
+            MoveTo(
               context: context,
-              content: 'Failed to communicating with gate system, please try again!',
-              headIcon: false,
-              okPressed: () => {},
-            ).show();
+              target: const ThanksPage(
+                type: 0,
+              ),
+              callback: (_) => CloseBack(context: context).go(),
+            ).go();
+          } else {
+            await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
+              startRFIDAuto();
+            });
           }
         });
       } else {

@@ -114,6 +114,7 @@ class BorrowedBooksDataJson {
   String? updatedAt;
   bool? isAvailable;
   String? rfidTag;
+  String? url;
   Bibliography? bibliography;
 
   BorrowedBooksDataJson({
@@ -138,6 +139,7 @@ class BorrowedBooksDataJson {
     this.updatedAt,
     this.isAvailable,
     this.rfidTag,
+    this.url,
     this.bibliography,
   });
 
@@ -163,6 +165,7 @@ class BorrowedBooksDataJson {
     updatedAt = json['updated_at'];
     isAvailable = json['is_available'];
     rfidTag = json['rfid_tag'];
+    url = json['url'];
     bibliography = json['bibliography'] != null
         ? Bibliography.fromJson(json['bibliography'])
         : null;
@@ -191,6 +194,7 @@ class BorrowedBooksDataJson {
     data['updated_at'] = updatedAt;
     data['is_available'] = isAvailable;
     data['rfid_tag'] = rfidTag;
+    data['url'] = url;
     if (bibliography != null) {
       data['bibliography'] = bibliography!.toJson();
     }
@@ -201,109 +205,251 @@ class BorrowedBooksDataJson {
 class Bibliography {
   int? id;
   String? title;
+  String? authorNames;
+  List<Authors>? authors;
   String? authorId;
-  int? collectionTypeId;
-  int? locationId;
-  int? frequencyId;
-  int? publisherId;
-  String? publishingYear;
-  int? publishingPlaceId;
-  String? subjectId;
-  int? languageId;
-  String? statement;
-  String? edition;
-  String? detailInfo;
   String? isbnOrIssn;
-  String? collation;
-  String? seriesTitle;
+  CollectionType? collectionType;
+  Publisher? publisher;
+  String? publishingYear;
+  Publisher? publishingPlace;
+  String? subjectNames;
+  List<Subjects>? subjects;
+  String? subjectId;
+  Publisher? language;
   String? callNumber;
   String? notes;
-  String? deletedAt;
-  String? createdAt;
-  String? updatedAt;
-  String? color;
-  String? color2;
 
   Bibliography({
     this.id,
     this.title,
+    this.authorNames,
+    this.authors,
     this.authorId,
-    this.collectionTypeId,
-    this.locationId,
-    this.frequencyId,
-    this.publisherId,
-    this.publishingYear,
-    this.publishingPlaceId,
-    this.subjectId,
-    this.languageId,
-    this.statement,
-    this.edition,
-    this.detailInfo,
     this.isbnOrIssn,
-    this.collation,
-    this.seriesTitle,
+    this.collectionType,
+    this.publisher,
+    this.publishingYear,
+    this.publishingPlace,
+    this.subjectNames,
+    this.subjects,
+    this.subjectId,
+    this.language,
     this.callNumber,
     this.notes,
-    this.deletedAt,
-    this.createdAt,
-    this.updatedAt,
-    this.color,
-    this.color2,
   });
 
   Bibliography.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     title = json['title'];
+    authorNames = json['author_names'];
+    if (json['authors'] != null) {
+      authors = <Authors>[];
+      json['authors'].forEach((v) {
+        authors!.add(Authors.fromJson(v));
+      });
+    }
     authorId = json['author_id'];
-    collectionTypeId = json['collection_type_id'];
-    locationId = json['location_id'];
-    frequencyId = json['frequency_id'];
-    publisherId = json['publisher_id'];
-    publishingYear = json['publishing_year'];
-    publishingPlaceId = json['publishing_place_id'];
-    subjectId = json['subject_id'];
-    languageId = json['language_id'];
-    statement = json['statement'];
-    edition = json['edition'];
-    detailInfo = json['detail_info'];
     isbnOrIssn = json['isbn_or_issn'];
-    collation = json['collation'];
-    seriesTitle = json['series_title'];
+    collectionType = json['collection_type'] != null
+        ? CollectionType.fromJson(json['collection_type'])
+        : null;
+    publisher = json['publisher'] != null
+        ? Publisher.fromJson(json['publisher'])
+        : null;
+    publishingYear = json['publishing_year'];
+    publishingPlace = json['publishing_place'] != null
+        ? Publisher.fromJson(json['publishing_place'])
+        : null;
+    subjectNames = json['subject_names'];
+    if (json['subjects'] != null) {
+      subjects = <Subjects>[];
+      json['subjects'].forEach((v) {
+        subjects!.add(Subjects.fromJson(v));
+      });
+    }
+    subjectId = json['subject_id'];
+    language = json['language'] != null
+        ? Publisher.fromJson(json['language'])
+        : null;
     callNumber = json['call_number'];
     notes = json['notes'];
-    deletedAt = json['deleted_at'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    color = json['color'];
-    color2 = json['color2'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['title'] = title;
+    data['author_names'] = authorNames;
+    if (authors != null) {
+      data['authors'] = authors!.map((v) => v.toJson()).toList();
+    }
     data['author_id'] = authorId;
-    data['collection_type_id'] = collectionTypeId;
-    data['location_id'] = locationId;
-    data['frequency_id'] = frequencyId;
-    data['publisher_id'] = publisherId;
-    data['publishing_year'] = publishingYear;
-    data['publishing_place_id'] = publishingPlaceId;
-    data['subject_id'] = subjectId;
-    data['language_id'] = languageId;
-    data['statement'] = statement;
-    data['edition'] = edition;
-    data['detail_info'] = detailInfo;
     data['isbn_or_issn'] = isbnOrIssn;
-    data['collation'] = collation;
-    data['series_title'] = seriesTitle;
+    if (collectionType != null) {
+      data['collection_type'] = collectionType!.toJson();
+    }
+    if (publisher != null) {
+      data['publisher'] = publisher!.toJson();
+    }
+    data['publishing_year'] = publishingYear;
+    if (publishingPlace != null) {
+      data['publishing_place'] = publishingPlace!.toJson();
+    }
+    data['subject_names'] = subjectNames;
+    if (subjects != null) {
+      data['subjects'] = subjects!.map((v) => v.toJson()).toList();
+    }
+    data['subject_id'] = subjectId;
+    if (language != null) {
+      data['language'] = language!.toJson();
+    }
     data['call_number'] = callNumber;
     data['notes'] = notes;
+    return data;
+  }
+}
+
+class Authors {
+  int? id;
+  String? name;
+  String? deletedAt;
+  String? createdAt;
+  String? updatedAt;
+
+  Authors({
+    this.id,
+    this.name,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Authors.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    deletedAt = json['deleted_at'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
     data['deleted_at'] = deletedAt;
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
-    data['color'] = color;
-    data['color2'] = color2;
+    return data;
+  }
+}
+
+class CollectionType {
+  int? id;
+  String? name;
+  String? description;
+  String? deletedAt;
+  String? createdAt;
+  String? updatedAt;
+
+  CollectionType({
+    this.id,
+    this.name,
+    this.description,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  CollectionType.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    description = json['description'];
+    deletedAt = json['deleted_at'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['description'] = description;
+    data['deleted_at'] = deletedAt;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    return data;
+  }
+}
+
+class Publisher {
+  int? id;
+  String? name;
+  String? deletedAt;
+  String? createdAt;
+  String? updatedAt;
+
+  Publisher({
+    this.id,
+    this.name,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Publisher.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    deletedAt = json['deleted_at'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['deleted_at'] = deletedAt;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    return data;
+  }
+}
+
+class Subjects {
+  int? id;
+  String? name;
+  String? classificationCode;
+  String? deletedAt;
+  String? createdAt;
+  String? updatedAt;
+
+  Subjects({
+    this.id,
+    this.name,
+    this.classificationCode,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Subjects.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    classificationCode = json['classification_code'];
+    deletedAt = json['deleted_at'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['classification_code'] = classificationCode;
+    data['deleted_at'] = deletedAt;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }

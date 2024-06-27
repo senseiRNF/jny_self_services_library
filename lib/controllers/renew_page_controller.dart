@@ -21,16 +21,26 @@ class RenewPage extends StatefulWidget {
 }
 
 class RenewPageController extends State<RenewPage> {
-  int? borrowId;
-
   List<BorrowedDetailDataJson> listBorrowedDetail = [];
-  List<BorrowedBooksDataJson> listBorrowedBooks = [];
+
+  String fromDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  String untilDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
   @override
   void initState() {
     super.initState();
 
-    checkBorrowedBook();
+    checkUntilDate().then((_) => checkBorrowedBook());
+  }
+
+  checkUntilDate() async {
+    await BookServices(context: context).showUntilDate(fromDate, 14).then((dateResult) {
+      if(dateResult != null) {
+        setState(() {
+          untilDate = dateResult;
+        });
+      }
+    });
   }
 
   Future checkBorrowedBook() async {
@@ -43,7 +53,7 @@ class RenewPageController extends State<RenewPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId).then((result) {
+    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId, "on loan").then((result) {
       List<BorrowedDetailDataJson> tempList = [];
       List<Map> tempConvertedList = [];
 
@@ -68,10 +78,9 @@ class RenewPageController extends State<RenewPage> {
     });
   }
 
-  renewBook(int borrowId) async {
+  renewBook(BorrowedDetailDataJson listBorrowedDetail) async {
     String? studentId;
     String? employeeId;
-    String extendUntilDate = DateFormat("yyyy-MM-dd").format(DateTime.now().add(const Duration(days: 7)));
 
     if(widget.libraryMemberData.nis != null) {
       studentId = widget.libraryMemberData.id!.toString();
@@ -81,13 +90,15 @@ class RenewPageController extends State<RenewPage> {
 
     String itemList = "";
 
-    for(int i = 0; i < listBorrowedBooks.length; i++) {
-      if(listBorrowedBooks[i].id != null) {
-        itemList = itemList.isNotEmpty ? "$itemList,${listBorrowedBooks[i].id!.toString()}" : listBorrowedBooks[i].id!.toString();
+    if(listBorrowedDetail.books != null) {
+      for(int i = 0; i < listBorrowedDetail.books!.length; i++) {
+        if(listBorrowedDetail.books![i].id != null) {
+          itemList = itemList.isNotEmpty ? "$itemList,${listBorrowedDetail.books![i].id!.toString()}" : listBorrowedDetail.books![i].id!.toString();
+        }
       }
     }
 
-    await BookServices(context: context).extendPeriodBook(borrowId, extendUntilDate, itemList, studentId, employeeId).then((result) {
+    await BookServices(context: context).extendPeriodBook(listBorrowedDetail.id, untilDate, itemList, studentId, employeeId).then((result) {
       if(result == true) {
         MoveTo(
           context: context,
@@ -98,38 +109,6 @@ class RenewPageController extends State<RenewPage> {
         ).go();
       }
     });
-  }
-
-  showBorrowedBooks(int id, List<BorrowedBooksDataJson> listBooks) {
-    List<BorrowedBooksDataJson> tempList = [];
-    List<Map> tempConvertedList = [];
-
-    for(int i = 0; i < listBooks.length; i++) {
-      tempList.add(listBooks[i]);
-      tempConvertedList.add(listBooks[i].toJson());
-    }
-
-    setState(() {
-      listBorrowedBooks = tempList;
-      borrowId = id;
-    });
-
-    DisplayMonitorServices.sendStateToMonitor(
-      "SHOW_RENEW_LIST",
-      {
-        "library_member": widget.libraryMemberData.toJson(),
-        "book_list": tempConvertedList,
-      },
-    );
-  }
-
-  closeBorrowedBooks() {
-    setState(() {
-      listBorrowedBooks.clear();
-      borrowId = null;
-    });
-
-    checkBorrowedBook();
   }
 
   @override

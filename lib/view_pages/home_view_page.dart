@@ -39,31 +39,31 @@ class HomeViewPage extends StatelessWidget {
                     items: [
                       MediaQuery.of(context).orientation == Orientation.landscape ?
                       Image.asset(
-                        'assets/images/welcome_landscape.png',
+                        'assets/images/welcome_ls.png',
                         fit: BoxFit.cover,
                       ) :
                       Image.asset(
-                        'assets/images/welcome_portrait.png',
+                        'assets/images/welcome_pt.png',
                         fit: BoxFit.cover,
                         width: MediaQuery.of(context).size.width,
                       ),
                       MediaQuery.of(context).orientation == Orientation.landscape ?
                       Image.asset(
-                        'assets/images/screensaver_1_landscape.png',
+                        'assets/images/ss_1_ls.png',
                         fit: BoxFit.cover,
                       ) :
                       Image.asset(
-                        'assets/images/screensaver_1_portrait.png',
+                        'assets/images/ss_1_pt.png',
                         fit: BoxFit.cover,
                         width: MediaQuery.of(context).size.width,
                       ),
                       MediaQuery.of(context).orientation == Orientation.landscape ?
                       Image.asset(
-                        'assets/images/screensaver_2_landscape.png',
+                        'assets/images/ss_2_ls.png',
                         fit: BoxFit.cover,
                       ) :
                       Image.asset(
-                        'assets/images/screensaver_2_portrait.png',
+                        'assets/images/ss_2_pt.png',
                         fit: BoxFit.cover,
                         width: MediaQuery.of(context).size.width,
                       ),

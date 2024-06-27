@@ -66,7 +66,7 @@ class SettingViewPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(5.0),
               ),
               child: InkWell(
-                onTap: () => controller.openCheckBookAlarmSettings(),
+                onTap: () => controller.openCheckBookStatusSettings(),
                 customBorder: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5.0),
                 ),
@@ -77,7 +77,7 @@ class SettingViewPage extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          'Check Book Alarm',
+                          'Check Book Status',
                         ),
                       ),
                       SizedBox(

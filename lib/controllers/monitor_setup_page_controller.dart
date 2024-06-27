@@ -4,7 +4,6 @@ import 'package:jny_self_services_library/services/locals/functions/route_functi
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
-import 'package:jny_self_services_library/services/networks/jsons/borrow_history_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/services/networks/pocket_base_config.dart';
@@ -96,6 +95,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
             books: [
               BorrowedBooksDataJson(
                 id: 0,
+                url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
                 bibliography: Bibliography(
                   id: 0,
                   title: "Testing Book",
@@ -120,6 +120,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
         "book_list": [
           BorrowedBooksDataJson(
             id: 0,
+            url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
             bibliography: Bibliography(
               id: 0,
               title: "Testing Book",
@@ -164,6 +165,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
             books: [
               BorrowedBooksDataJson(
                 id: 0,
+                url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
                 bibliography: Bibliography(
                   id: 0,
                   title: "Testing Book",
@@ -188,6 +190,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
         "book_list": [
           BorrowedBooksDataJson(
             id: 0,
+            url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
             bibliography: Bibliography(
               id: 0,
               title: "Testing Book",
@@ -216,6 +219,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
             books: [
               BorrowedBooksDataJson(
                 id: 0,
+                url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
                 bibliography: Bibliography(
                   id: 0,
                   title: "Testing Book",
@@ -242,6 +246,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
             "scanned": false,
             "book_data": BorrowedBooksDataJson(
               id: 0,
+              url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
               bibliography: Bibliography(
                 id: 0,
                 title: "Testing Book",
@@ -271,6 +276,7 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
             books: [
               BorrowedBooksDataJson(
                 id: 0,
+                url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
                 bibliography: Bibliography(
                   id: 0,
                   title: "Testing Book",
@@ -282,16 +288,21 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
           ).toJson(),
         ],
         "history": [
-          BorrowHistoryDataJson(
+          BorrowedDetailDataJson(
             id: 0,
-            studentId: 0,
-            fromDate: "2024-04-01",
-            untilDate: "2024-04-05",
+            fromDate: "2024-03-01",
+            untilDate: "2024-03-05",
             status: "Returned",
-            items: [
-              Items(
+            books: [
+              BorrowedBooksDataJson(
+                id: 0,
                 url: "https://tr.rbxcdn.com/537c5ad362e65b2247cbef6be9f8de7d/420/420/Hat/Png",
-                title: "Testing Book",
+                bibliography: Bibliography(
+                  id: 0,
+                  title: "Testing Book",
+                  isbnOrIssn: "0123abcd456",
+                  publishingYear: "2024",
+                ),
               ),
             ],
           ).toJson(),

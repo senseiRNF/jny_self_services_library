@@ -17,15 +17,12 @@ class BookListPage extends StatefulWidget {
 
 class BookListPageController extends State<BookListPage> {
   List<BookDataJson> bookList = [];
-  List<BookDataJson> queryBookList = [];
-
   List<SubjectListDataJson> subjectList = [
     SubjectListDataJson(
       id: 0,
       name: "All Subjects",
     ),
   ];
-
   List<LanguageListDataJson> languageList = [
     LanguageListDataJson(
       id: 0,
@@ -51,28 +48,54 @@ class BookListPageController extends State<BookListPage> {
     loadLanguage().then((_) => loadSubjects().then((_) async => loadBookList()));
   }
 
-  loadBookList() async => await BookServices(context: context).showAllBook().then((bookResult) {
-    setState(() {
-      bookList = bookResult;
-    });
-
-    if(searchQueryTEC.text != '') {
-      List<BookDataJson> tempQueryBookList = [];
+  loadBookList() async => await BookServices(context: context).showBookByFilter(searchQueryTEC.text).then((bookResult) {
+    if(selectedSubject.id != 0 || selectedLanguage.id != 0) {
+      List<BookDataJson> tempBookList = [];
 
       for(int i = 0; i < bookResult.length; i++) {
-        if(bookResult[i].title != null && bookResult[i].authorNames != null) {
-          if(bookResult[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) || bookResult[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
-            tempQueryBookList.add(bookResult[i]);
+        if(selectedSubject.id != 0 && selectedLanguage.id != 0) {
+          List<String> subjectId = bookResult[i].subjectId!.split(",").toList();
+          bool subjectMatch = false;
+
+          for(int x = 0; x < subjectId.length; x++) {
+            if(int.parse(subjectId[x]) == selectedSubject.id!) {
+              subjectMatch = true;
+            }
+          }
+
+          if(subjectMatch == true && bookResult[i].languageId == selectedLanguage.id!) {
+            tempBookList.add(bookResult[i]);
+          }
+        } else if(selectedSubject.id != 0) {
+          if(bookResult[i].subjectId != null) {
+            List<String> subjectId = bookResult[i].subjectId!.split(",").toList();
+            bool subjectMatch = false;
+
+            for(int x = 0; x < subjectId.length; x++) {
+              if(int.parse(subjectId[x]) == selectedSubject.id!) {
+                subjectMatch = true;
+              }
+            }
+
+            if(subjectMatch == true) {
+              tempBookList.add(bookResult[i]);
+            }
+          }
+        } else if(selectedLanguage.id != 0) {
+          if(bookResult[i].languageId != null) {
+            if(bookResult[i].languageId == selectedLanguage.id!) {
+              tempBookList.add(bookResult[i]);
+            }
           }
         }
       }
 
       setState(() {
-        queryBookList = tempQueryBookList;
+        bookList = tempBookList;
       });
     } else {
       setState(() {
-        queryBookList = bookResult;
+        bookList = bookResult;
       });
     }
   });
@@ -115,111 +138,6 @@ class BookListPageController extends State<BookListPage> {
     });
   }
 
-  searchBook() {
-    List<BookDataJson> tempQueryBookList = [];
-
-    if(searchQueryTEC.text != '') {
-      for(int i = 0; i < bookList.length; i++) {
-        if(bookList[i].title != null && bookList[i].authorNames != null && selectedSubject.id != 0 && selectedLanguage.id != 0) {
-          if(bookList[i].subjectId != null && bookList[i].languageId != null) {
-            List<String> subjectId = bookList[i].subjectId!.split(",").toList();
-            bool subjectMatch = false;
-
-            for(int x = 0; x < subjectId.length; x++) {
-              if(int.parse(subjectId[x]) == selectedSubject.id!) {
-                subjectMatch = true;
-              }
-            }
-
-            if(subjectMatch == true && bookList[i].languageId == selectedLanguage.id!) {
-              if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                  bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
-                tempQueryBookList.add(bookList[i]);
-              }
-            }
-          }
-        } else if(selectedSubject.id != 0) {
-          if(bookList[i].title != null && bookList[i].authorNames != null && bookList[i].subjectId != null) {
-            List<String> subjectId = bookList[i].subjectId!.split(",").toList();
-            bool subjectMatch = false;
-
-            for(int x = 0; x < subjectId.length; x++) {
-              if(int.parse(subjectId[x]) == selectedSubject.id!) {
-                subjectMatch = true;
-              }
-            }
-
-            if(subjectMatch == true) {
-              if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                  bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
-                tempQueryBookList.add(bookList[i]);
-              }
-            }
-          }
-        } else if(selectedLanguage.id != 0) {
-          if(bookList[i].title != null && bookList[i].authorNames != null && bookList[i].languageId != null) {
-            if(bookList[i].languageId == selectedLanguage.id!) {
-              if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) ||
-                  bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
-                tempQueryBookList.add(bookList[i]);
-              }
-            }
-          }
-        } else {
-          if(bookList[i].title != null && bookList[i].authorNames != null) {
-            if(bookList[i].title!.toLowerCase().contains(searchQueryTEC.text.toLowerCase()) || bookList[i].authorNames!.toLowerCase().contains(searchQueryTEC.text.toLowerCase())) {
-              tempQueryBookList.add(bookList[i]);
-            }
-          }
-        }
-      }
-    } else if(selectedSubject.id != 0 || selectedLanguage.id != 0) {
-      for(int i = 0; i < bookList.length; i++) {
-        if(selectedSubject.id != 0 && selectedLanguage.id != 0) {
-          List<String> subjectId = bookList[i].subjectId!.split(",").toList();
-          bool subjectMatch = false;
-
-          for(int x = 0; x < subjectId.length; x++) {
-            if(int.parse(subjectId[x]) == selectedSubject.id!) {
-              subjectMatch = true;
-            }
-          }
-
-          if(subjectMatch == true && bookList[i].languageId == selectedLanguage.id!) {
-            tempQueryBookList.add(bookList[i]);
-          }
-        } else if(selectedSubject.id != 0) {
-          if(bookList[i].subjectId != null) {
-            List<String> subjectId = bookList[i].subjectId!.split(",").toList();
-            bool subjectMatch = false;
-
-            for(int x = 0; x < subjectId.length; x++) {
-              if(int.parse(subjectId[x]) == selectedSubject.id!) {
-                subjectMatch = true;
-              }
-            }
-
-            if(subjectMatch == true) {
-              tempQueryBookList.add(bookList[i]);
-            }
-          }
-        } else if(selectedLanguage.id != 0) {
-          if(bookList[i].languageId != null) {
-            if(bookList[i].languageId == selectedLanguage.id!) {
-              tempQueryBookList.add(bookList[i]);
-            }
-          }
-        }
-      }
-    } else {
-      tempQueryBookList = bookList;
-    }
-
-    setState(() {
-      queryBookList = tempQueryBookList;
-    });
-  }
-
   showBookDetail(BookDataJson bookData) async {
     DisplayMonitorServices.sendStateToMonitor(
       "SHOW_BOOK_DETAIL",
@@ -242,7 +160,7 @@ class BookListPageController extends State<BookListPage> {
           selectedSubject = subject;
         });
 
-        searchBook();
+        loadBookList();
       }
     }
   ).go();
@@ -259,7 +177,7 @@ class BookListPageController extends State<BookListPage> {
             selectedLanguage = language;
           });
 
-          searchBook();
+          loadBookList();
         }
       }
   ).go();

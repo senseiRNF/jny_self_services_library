@@ -34,15 +34,12 @@ class HealthCheckPageController extends State<HealthCheckPage> {
         await checkGateConnection().then((_) async =>
             await checkMonitorConnection().then((_) =>
                 setState(() {
+                  isHealthCheckRun = true;
                   currentTroubleshootState = "Completed";
                 })
             )
         )
     );
-
-    setState(() {
-      isHealthCheckRun = true;
-    });
   }
 
   Future checkBluetoothConnection() async {
@@ -118,9 +115,11 @@ class HealthCheckPageController extends State<HealthCheckPage> {
       currentTroubleshootState = "Checking Monitor Activity";
     });
 
-    await DisplayMonitorServices.checkMonitorConnections().then((connection) => setState(() {
-      isMonitorConnected = connection;
-    }));
+    await DisplayMonitorServices.checkMonitorConnections().then((connection) {
+      setState(() {
+        isMonitorConnected = connection;
+      });
+    });
   }
 
   @override

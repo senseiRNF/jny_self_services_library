@@ -23,16 +23,16 @@ class ThanksPageController extends State<ThanksPage> {
   late Timer timer;
 
   late String assetPathLandscape = widget.type == 0 ?
-  'assets/images/thank_you_borrow_landscape.png' :
+  'assets/images/borrow_ls.png' :
   widget.type == 1 ?
-  'assets/images/thank_you_return_landscape.png' :
-  'assets/images/thank_you_renew_landscape.png';
+  'assets/images/return_ls.png' :
+  'assets/images/renew_ls.png';
 
   late String assetPathPortrait = widget.type == 0 ?
-  'assets/images/thank_you_borrow_portrait.png' :
+  'assets/images/borrow_pt.png' :
   widget.type == 1 ?
-  'assets/images/thank_you_return_portrait.png' :
-  'assets/images/thank_you_renew_portrait.png';
+  'assets/images/return_pt.png' :
+  'assets/images/renew_pt.png';
 
   @override
   void initState() {

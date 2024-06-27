@@ -20,7 +20,8 @@ class AccountPage extends StatefulWidget {
 }
 
 class AccountPageController extends State<AccountPage> {
-  List<BorrowedDetailDataJson> listBorrowedDetail = [];
+  List<BorrowedDetailDataJson> borrowedList = [];
+  List<BorrowedDetailDataJson> historyList = [];
 
   bool showLoading = false;
 
@@ -41,55 +42,50 @@ class AccountPageController extends State<AccountPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId).then((result) async {
-      List<BorrowedDetailDataJson> tempList = [];
-      List<Map> tempConvertedList = [];
+    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId, "all").then((result) async {
+      List<BorrowedDetailDataJson> tempBorrowedList = [];
+      List<BorrowedDetailDataJson> tempHistoryList = [];
+
+      List<Map> tempBorrowedListMap = [];
+      List<Map> tempHistoryListMap = [];
 
       if(result != null && result.borrowedDetailDataJson != null) {
         for(int i = 0; i < result.borrowedDetailDataJson!.length; i++) {
-          tempList.add(result.borrowedDetailDataJson![i]);
-          tempConvertedList.add(result.borrowedDetailDataJson![i].toJson());
+          if(result.borrowedDetailDataJson![i].status != null && result.borrowedDetailDataJson![i].status!.toLowerCase() == "returned") {
+            if(i <= 5) {
+              tempHistoryListMap.add(result.borrowedDetailDataJson![i].toJson());
+              tempHistoryList.add(result.borrowedDetailDataJson![i]);
+            }
+          } else if(result.borrowedDetailDataJson![i].status != null) {
+            tempBorrowedListMap.add(result.borrowedDetailDataJson![i].toJson());
+            tempBorrowedList.add(result.borrowedDetailDataJson![i]);
+          }
         }
       }
 
       setState(() {
-        listBorrowedDetail = tempList;
+        borrowedList = tempBorrowedList;
+        historyList = tempHistoryList;
       });
 
-      await BookServices(context: context).showHistoryBorrow(studentId, employeeId).then((historyResult) {
-        List<Map> tempBorrowList = [];
-
-        for(int i = 0; i < historyResult.length; i++) {
-          tempBorrowList.add(historyResult[i].toJson());
-        }
-
-        if(tempBorrowList.isNotEmpty) {
-          DisplayMonitorServices.sendStateToMonitor(
-            "SHOW_BORROWED",
-            {
-              "library_member": widget.libraryMemberData.toJson(),
-              "book_list": tempConvertedList,
-              "history": tempBorrowList,
-            },
-          );
-        } else {
-          DisplayMonitorServices.sendStateToMonitor(
-            "SHOW_BORROWED",
-            {
-              "library_member": widget.libraryMemberData.toJson(),
-              "book_list": tempConvertedList,
-            },
-          );
-        }
-      }).catchError((err) {
+      if(tempHistoryList.isNotEmpty) {
         DisplayMonitorServices.sendStateToMonitor(
           "SHOW_BORROWED",
           {
             "library_member": widget.libraryMemberData.toJson(),
-            "book_list": tempConvertedList,
+            "book_list": tempBorrowedListMap,
+            "history": tempHistoryListMap,
           },
         );
-      });
+      } else {
+        DisplayMonitorServices.sendStateToMonitor(
+          "SHOW_BORROWED",
+          {
+            "library_member": widget.libraryMemberData.toJson(),
+            "book_list": tempBorrowedListMap,
+          },
+        );
+      }
     });
   }
 
@@ -97,8 +93,21 @@ class AccountPageController extends State<AccountPage> {
     MoveTo(
       context: context,
       target: BorrowedBookListPage(
+        title: "Borrowed - Book List",
         libraryMemberData: widget.libraryMemberData,
         bookList: bookList,
+      ),
+      callback: (_) => checkBorrowedBook(),
+    ).go();
+  }
+
+  openListOfHistory(List<BorrowedBooksDataJson> historyList) {
+    MoveTo(
+      context: context,
+      target: BorrowedBookListPage(
+        title: "History - Book List",
+        libraryMemberData: widget.libraryMemberData,
+        bookList: historyList,
       ),
       callback: (_) => checkBorrowedBook(),
     ).go();

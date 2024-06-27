@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/controllers/renew_page_controller.dart';
-import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 
 class RenewViewPage extends StatelessWidget {
   final RenewPageController controller;
@@ -79,11 +78,9 @@ class RenewViewPage extends StatelessWidget {
             ),
           ),
           controller.listBorrowedDetail.isNotEmpty ?
-          controller.listBorrowedBooks.isEmpty ?
           Expanded(
             child: ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
               itemCount: controller.listBorrowedDetail.length,
               itemBuilder: (BuildContext listContext, int index) {
                 return Card(
@@ -91,182 +88,133 @@ class RenewViewPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0),
                   ),
-                  child: InkWell(
-                    onTap: () {
-                      if(controller.listBorrowedDetail[index].id != null && controller.listBorrowedDetail[index].books != null) {
-                        List<BorrowedBooksDataJson> tempList = controller.listBorrowedDetail[index].books!;
-
-                        controller.showBorrowedBooks(controller.listBorrowedDetail[index].id!, tempList);
-                      }
-                    },
-                    customBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Borrow Date: ${controller.listBorrowedDetail[index].fromDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].fromDate!)) : "Unknown"}',
+                        ),
+                        Text(
+                          'Return Date: ${controller.listBorrowedDetail[index].untilDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].untilDate!)) : "Unknown"}',
+                        ),
+                        const SizedBox(
+                          height: 10.0,
+                        ),
+                        controller.listBorrowedDetail[index].books != null ?
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: controller.listBorrowedDetail[index].books!.length,
+                          separatorBuilder: (separatorContext, separatorIndex) {
+                            return const SizedBox(
+                              height: 5.0,
+                            );
+                          },
+                          itemBuilder: (subListContext, subIndex) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  'Borrow Date: ${controller.listBorrowedDetail[index].fromDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].fromDate!)) : "Unknown"}',
+                                SizedBox(
+                                  width: 80.0,
+                                  height: 80.0,
+                                  child: CachedNetworkImage(
+                                    imageUrl: controller.listBorrowedDetail[index].books![subIndex].url ?? "",
+                                    fit: BoxFit.contain,
+                                    errorWidget: (errContext, _, errObj) {
+                                      return Icon(
+                                        Icons.book,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      );
+                                    },
+                                  ),
                                 ),
-                                Text(
-                                  'Return Date: ${controller.listBorrowedDetail[index].untilDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].untilDate!)) : "Unknown"}',
-                                ),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Text(
-                                  'Status: ${controller.listBorrowedDetail[index].status ?? "Unknown"}',
-                                ),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Text(
-                                  'Number Of Books Borrowed: ${controller.listBorrowedDetail[index].books != null ? controller.listBorrowedDetail[index].books!.length : "Unknown"}',
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text(
+                                        controller.listBorrowedDetail[index].books![subIndex].bibliography!.title ?? 'Unknown',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      Text(
+                                        "ISBN/ISSN: ${controller.listBorrowedDetail[index].books![subIndex].bibliography!.isbnOrIssn ?? 'Unknown'}",
+                                      ),
+                                      const SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Authors: ',
+                                          ),
+                                          Text(
+                                            controller.listBorrowedDetail[index].books![subIndex].bibliography != null ?
+                                            controller.listBorrowedDetail[index].books![subIndex].bibliography!.authorNames ?? 'Unknown' :
+                                            'Unknown',
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Publisher: ${controller.listBorrowedDetail[index].books![subIndex].bibliography != null
+                                                  && controller.listBorrowedDetail[index].books![subIndex].bibliography!.publisher != null ?
+                                              controller.listBorrowedDetail[index].books![subIndex].bibliography!.publisher!.name ?? 'Unknown' :
+                                              "Unknown"} ',
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              'Publishing Year: ${controller.listBorrowedDetail[index].books![subIndex].bibliography != null ?
+                                              controller.listBorrowedDetail[index].books![subIndex].bibliography!.publishingYear ?? 'Unknown' :
+                                              "Unknown"} ',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
-                            ),
+                            );
+                          },
+                        ) :
+                        const Material(),
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () => controller.renewBook(controller.listBorrowedDetail[index]),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+                                  child: Text(
+                                    'Renew Books',
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          const Icon(
-                            Icons.navigate_next,
-                            size: 35.0,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
               },
-            ),
-          ) :
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: ElevatedButton(
-                    onPressed: () => controller.closeBorrowedBooks(),
-                    child: const Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.arrow_back,
-                            size: 35.0,
-                          ),
-                          SizedBox(
-                            width: 10.0,
-                          ),
-                          Text(
-                            'Back',
-                            style: TextStyle(
-                              fontSize: 16.0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: controller.listBorrowedBooks.length,
-                    itemBuilder: (BuildContext listContext, int index) {
-                      return controller.listBorrowedBooks[index].bibliography != null ?
-                      Container(
-                        margin: const EdgeInsets.all(10.0),
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.black54,
-                          ),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 30.0,
-                              height: 30.0,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "${index + 1}",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Text(
-                                    controller.listBorrowedBooks[index].bibliography!.title ?? 'Unknown',
-                                    style: const TextStyle(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Text(
-                                    "ISBN/ISSN: ${controller.listBorrowedBooks[index].bibliography!.isbnOrIssn ?? 'Unknown'}",
-                                    style: const TextStyle(
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ) :
-                      const Material();
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => controller.borrowId != null ?
-                        controller.renewBook(controller.borrowId!) : {},
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                          child: Text(
-                            'Renew Books',
-                            style: TextStyle(
-                              fontSize: 24.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ) :
           Expanded(

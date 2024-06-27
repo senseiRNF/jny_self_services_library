@@ -24,10 +24,8 @@ class DisplayMonitorServices {
 
     PocketBase pbConfig = PocketBaseConfig.pb;
 
-    await SharedPrefsFunctions.readData('pairingID').then((pairingIDResult) {
-      pbConfig.collection("testing").getFullList().then((pbResult) {
-        result = true;
-      });
+    await pbConfig.collection("testing").getFullList().then((pbResult) {
+      result = true;
     });
 
     return result;

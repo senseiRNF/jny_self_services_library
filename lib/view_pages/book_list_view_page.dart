@@ -28,10 +28,10 @@ class BookListViewPage extends StatelessWidget {
                 TextField(
                   controller: controller.searchQueryTEC,
                   decoration: const InputDecoration(
-                    labelText: "Search Book by 'Title' or 'Authors'",
+                    labelText: "Search Book by 'Title', 'Authors' or 'ISBN/ISSN'",
                     border: OutlineInputBorder(),
                   ),
-                  onSubmitted: (_) => controller.searchBook(),
+                  onSubmitted: (_) => controller.loadBookList(),
                   textInputAction: TextInputAction.search,
                 ),
                 const SizedBox(
@@ -122,16 +122,16 @@ class BookListViewPage extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: controller.queryBookList.isNotEmpty ?
+            child: controller.bookList.isNotEmpty ?
             RefreshIndicator(
               onRefresh: () => controller.loadBookList(),
               child: ListView.builder(
-                itemCount: controller.queryBookList.length,
+                itemCount: controller.bookList.length,
                 itemBuilder: (listContext, index) {
                   return Card(
                     elevation: 5.0,
                     child: InkWell(
-                      onTap: () => controller.showBookDetail(controller.queryBookList[index]),
+                      onTap: () => controller.showBookDetail(controller.bookList[index]),
                       customBorder: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4.0),
                       ),
@@ -144,7 +144,7 @@ class BookListViewPage extends StatelessWidget {
                               MediaQuery.of(context).size.width / 12 :
                               MediaQuery.of(context).size.width / 8,
                               child: CachedNetworkImage(
-                                imageUrl: controller.queryBookList[index].mediaPath ?? '',
+                                imageUrl: controller.bookList[index].mediaPath ?? '',
                                 fit: BoxFit.contain,
                               ),
                             ),
@@ -156,7 +156,7 @@ class BookListViewPage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Text(
-                                    controller.queryBookList[index].title ?? 'Unknown Title',
+                                    controller.bookList[index].title ?? 'Unknown Title',
                                     style: const TextStyle(
                                       fontSize: 16.0,
                                       fontWeight: FontWeight.w700,
@@ -173,7 +173,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].code ?? 'Unknown Code',
+                                          controller.bookList[index].code ?? 'Unknown Code',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -189,7 +189,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].isbnOrIssn ?? 'Unknown',
+                                          controller.bookList[index].isbnOrIssn ?? 'Unknown',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -205,7 +205,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].authorNames ?? 'Unknown Authors',
+                                          controller.bookList[index].authorNames ?? 'Unknown Authors',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -221,7 +221,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].publisher ?? 'Unknown Publisher',
+                                          controller.bookList[index].publisher ?? 'Unknown Publisher',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -237,7 +237,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].publishingYear ?? 'Unknown',
+                                          controller.bookList[index].publishingYear ?? 'Unknown',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -256,7 +256,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].location ?? '-',
+                                          controller.bookList[index].location ?? '-',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),
@@ -272,7 +272,7 @@ class BookListViewPage extends StatelessWidget {
                                       Expanded(
                                         flex: 6,
                                         child: Text(
-                                          controller.queryBookList[index].shelfLocation ?? '-',
+                                          controller.bookList[index].shelfLocation ?? '-',
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w700,
                                           ),

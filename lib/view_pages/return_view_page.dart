@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/controllers/return_page_controller.dart';
-import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 
 class ReturnViewPage extends StatelessWidget {
   final ReturnPageController controller;
@@ -83,7 +82,6 @@ class ReturnViewPage extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
               itemCount: controller.listBorrowedDetail.length,
               itemBuilder: (BuildContext listContext, int index) {
                 return Card(
@@ -91,56 +89,147 @@ class ReturnViewPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5.0),
                   ),
-                  child: InkWell(
-                    onTap: () {
-                      if(controller.listBorrowedDetail[index].id != null && controller.listBorrowedDetail[index].books != null) {
-                        List<BorrowedBooksDataJson> tempList = controller.listBorrowedDetail[index].books!;
-
-                        controller.showBorrowedBooks(controller.listBorrowedDetail[index].id!, tempList);
-                      }
-                    },
-                    customBorder: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  'Borrow Date: ${controller.listBorrowedDetail[index].fromDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].fromDate!)) : "Unknown"}',
-                                ),
-                                Text(
-                                  'Return Date: ${controller.listBorrowedDetail[index].untilDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].untilDate!)) : "Unknown"}',
-                                ),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Text(
-                                  'Status: ${controller.listBorrowedDetail[index].status ?? "Unknown"}',
-                                ),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Text(
-                                  'Number Of Books Borrowed: ${controller.listBorrowedDetail[index].books != null ? controller.listBorrowedDetail[index].books!.length : "Unknown"}',
-                                ),
-                              ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    'Borrow Date: ${controller.listBorrowedDetail[index].fromDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].fromDate!)) : "Unknown"}',
+                                  ),
+                                  Text(
+                                    'Return Date: ${controller.listBorrowedDetail[index].untilDate != null ? DateFormat('EEEE, dd MMMM yyyy').format(DateTime.parse(controller.listBorrowedDetail[index].untilDate!)) : "Unknown"}',
+                                  ),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  controller.listBorrowedDetail[index].books != null ?
+                                  ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: controller.listBorrowedDetail[index].books!.length,
+                                    separatorBuilder: (separatorContext, separatorIndex) {
+                                      return const SizedBox(
+                                        height: 5.0,
+                                      );
+                                    },
+                                    itemBuilder: (subListContext, subIndex) {
+                                      return Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox(
+                                            width: 80.0,
+                                            height: 80.0,
+                                            child: CachedNetworkImage(
+                                              imageUrl: controller.listBorrowedDetail[index].books![subIndex].url ?? "",
+                                              fit: BoxFit.contain,
+                                              errorWidget: (errContext, _, errObj) {
+                                                return Icon(
+                                                  Icons.book,
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                                              children: [
+                                                Text(
+                                                  controller.listBorrowedDetail[index].books![subIndex].bibliography!.title ?? 'Unknown',
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Text(
+                                                  "ISBN/ISSN: ${controller.listBorrowedDetail[index].books![subIndex].bibliography!.isbnOrIssn ?? 'Unknown'}",
+                                                ),
+                                                const SizedBox(
+                                                  height: 10.0,
+                                                ),
+                                                Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    const Text(
+                                                      'Authors: ',
+                                                    ),
+                                                    Text(
+                                                      controller.listBorrowedDetail[index].books![subIndex].bibliography != null ?
+                                                      controller.listBorrowedDetail[index].books![subIndex].bibliography!.authorNames ?? 'Unknown' :
+                                                      'Unknown',
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        'Publisher: ${controller.listBorrowedDetail[index].books![subIndex].bibliography != null
+                                                            && controller.listBorrowedDetail[index].books![subIndex].bibliography!.publisher != null ?
+                                                        controller.listBorrowedDetail[index].books![subIndex].bibliography!.publisher!.name ?? 'Unknown' :
+                                                        "Unknown"} ',
+                                                      ),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(
+                                                        'Publishing Year: ${controller.listBorrowedDetail[index].books![subIndex].bibliography != null ?
+                                                        controller.listBorrowedDetail[index].books![subIndex].bibliography!.publishingYear ?? 'Unknown' :
+                                                        "Unknown"} ',
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ) :
+                                  const Material(),
+                                ],
+                              ),
                             ),
+                            const SizedBox(
+                              width: 20.0,
+                            ),
+                            const Icon(
+                              Icons.navigate_next,
+                              size: 35.0,
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () => controller.showBorrowedBooks(controller.listBorrowedDetail[index]),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+                                  child: Text(
+                                    'Return Books',
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          const Icon(
-                            Icons.navigate_next,
-                            size: 35.0,
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -215,6 +304,16 @@ class ReturnViewPage extends StatelessWidget {
                             const SizedBox(
                               width: 10.0,
                             ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 16,
+                              child: CachedNetworkImage(
+                                imageUrl: controller.listBorrowedBooks[index].values.first.url ?? '',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10.0,
+                            ),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -234,6 +333,54 @@ class ReturnViewPage extends StatelessWidget {
                                     style: const TextStyle(
                                       fontSize: 14.0,
                                     ),
+                                  ),
+                                  const SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Authors: ',
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                        ),
+                                      ),
+                                      Text(
+                                        controller.listBorrowedBooks[index].values.first.bibliography != null ?
+                                        controller.listBorrowedBooks[index].values.first.bibliography!.authorNames ?? 'Unknown' :
+                                        'Unknown',
+                                        style: const TextStyle(
+                                          fontSize: 14.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Publisher: ${controller.listBorrowedBooks[index].values.first.bibliography != null
+                                              && controller.listBorrowedBooks[index].values.first.bibliography!.publisher != null ?
+                                          controller.listBorrowedBooks[index].values.first.bibliography!.publisher!.name ?? 'Unknown' :
+                                          "Unknown"} ',
+                                          style: const TextStyle(
+                                            fontSize: 14.0,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          'Publishing Year: ${controller.listBorrowedBooks[index].values.first.bibliography != null ?
+                                          controller.listBorrowedBooks[index].values.first.bibliography!.publishingYear ?? 'Unknown' :
+                                          "Unknown"} ',
+                                          style: const TextStyle(
+                                            fontSize: 14.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
@@ -259,18 +406,43 @@ class ReturnViewPage extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      ElevatedButton(
-                        onPressed: () => controller.borrowId != null ?
-                        controller.returnBook(controller.borrowId!) : {},
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                          child: Text(
-                            'Return Books',
-                            style: TextStyle(
-                              fontSize: 24.0,
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => controller.clearScannedRFIDList(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.blue,
+                            elevation: 10.0,
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+                            child: Text(
+                              'Rescan Books',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 24.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10.0,
+                      ),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => controller.selectedBorrowedDetail != null && controller.selectedBorrowedDetail!.id != null ?
+                          controller.returnBook(controller.selectedBorrowedDetail!.id!) : {},
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+                            child: Text(
+                              'Return Books',
+                              style: TextStyle(
+                                fontSize: 24.0,
+                              ),
                             ),
                           ),
                         ),

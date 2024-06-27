@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/borrowed_book_list_page_controller.dart';
 
@@ -13,8 +14,8 @@ class BorrowedBookListViewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'List Of Books',
+        title: Text(
+          controller.widget.title,
         ),
       ),
       body: ListView.builder(
@@ -31,7 +32,7 @@ class BorrowedBookListViewPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(5.0),
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: 30.0,
@@ -47,6 +48,16 @@ class BorrowedBookListViewPage extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
+                  ),
+                ),
+                const SizedBox(
+                  width: 10.0,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 16,
+                  child: CachedNetworkImage(
+                    imageUrl: controller.widget.bookList[index].url ?? '',
+                    fit: BoxFit.contain,
                   ),
                 ),
                 const SizedBox(
@@ -74,6 +85,51 @@ class BorrowedBookListViewPage extends StatelessWidget {
                       ),
                       const SizedBox(
                         height: 10.0,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Authors: ',
+                            style: TextStyle(
+                              fontSize: 14.0,
+                            ),
+                          ),
+                          Text(
+                            controller.widget.bookList[index].bibliography != null ?
+                            controller.widget.bookList[index].bibliography!.authorNames ?? 'Unknown' :
+                            'Unknown',
+                            style: const TextStyle(
+                              fontSize: 14.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Publisher: ${controller.widget.bookList[index].bibliography != null
+                                  && controller.widget.bookList[index].bibliography!.publisher != null ?
+                              controller.widget.bookList[index].bibliography!.publisher!.name ?? 'Unknown' :
+                              "Unknown"} ',
+                              style: const TextStyle(
+                                fontSize: 14.0,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              'Publishing Year: ${controller.widget.bookList[index].bibliography != null ?
+                              controller.widget.bookList[index].bibliography!.publishingYear ?? 'Unknown' :
+                              "Unknown"} ',
+                              style: const TextStyle(
+                                fontSize: 14.0,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/alarm_gate_setup_page_controller.dart';
 import 'package:jny_self_services_library/controllers/bluetooth_setting_page_controller.dart';
-import 'package:jny_self_services_library/controllers/check_book_alarm_setting_page_controller.dart';
+import 'package:jny_self_services_library/controllers/check_book_status_setting_page_controller.dart';
 import 'package:jny_self_services_library/controllers/lock_setting_page_controller.dart';
 import 'package:jny_self_services_library/controllers/monitor_setup_page_controller.dart';
 import 'package:jny_self_services_library/controllers/splash_page_controller.dart';
@@ -26,9 +26,9 @@ class SettingPageController extends State<SettingPage> {
     target: const BluetoothSettingPage(),
   ).go();
 
-  openCheckBookAlarmSettings() => MoveTo(
+  openCheckBookStatusSettings() => MoveTo(
     context: context,
-    target: const CheckBookAlarmSettingPage(),
+    target: const CheckBookStatusSettingPage(),
   ).go();
 
   changeLockPIN() => MoveTo(

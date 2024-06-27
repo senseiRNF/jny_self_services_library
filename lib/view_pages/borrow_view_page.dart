@@ -110,112 +110,108 @@ class BorrowViewPage extends StatelessWidget {
                   child: ListView.builder(
                     itemCount: controller.bookDataList.length,
                     itemBuilder: (BuildContext listContext, int index) {
-                      return Container(
-                        margin: const EdgeInsets.all(10.0),
-                        padding: const EdgeInsets.all(10.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.black54,
-                          ),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 30.0,
-                              height: 30.0,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  "${index + 1}",
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                      return Card(
+                        elevation: 5.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 30.0,
+                                height: 30.0,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    "${index + 1}",
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width / 16,
-                              child: CachedNetworkImage(
-                                imageUrl: controller.bookDataList[index].mediaPath ?? '',
-                                fit: BoxFit.contain,
+                              const SizedBox(
+                                width: 10.0,
                               ),
-                            ),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Text(
-                                    controller.bookDataList[index].title ?? 'Unknown',
-                                    style: const TextStyle(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Text(
-                                    "ISBN/ISSN: ${controller.bookDataList[index].isbnOrIssn ?? 'Unknown'}",
-                                    style: const TextStyle(
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Authors: ',
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                        ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width / 16,
+                                child: CachedNetworkImage(
+                                  imageUrl: controller.bookDataList[index].mediaPath ?? '',
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10.0,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      controller.bookDataList[index].title ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.w700,
                                       ),
-                                      Text(
-                                        controller.bookDataList[index].authorNames ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontSize: 14.0,
-                                        ),
+                                    ),
+                                    const SizedBox(
+                                      height: 10.0,
+                                    ),
+                                    Text(
+                                      "ISBN/ISSN: ${controller.bookDataList[index].isbnOrIssn ?? 'Unknown'}",
+                                      style: const TextStyle(
+                                        fontSize: 14.0,
                                       ),
-                                    ],
-                                  ),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          'Publisher: ${controller.bookDataList[index].publisher ?? 'Unknown'} ',
+                                    ),
+                                    const SizedBox(
+                                      height: 10.0,
+                                    ),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          'Authors: ',
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                          ),
+                                        ),
+                                        Text(
+                                          controller.bookDataList[index].authorNames ?? 'Unknown',
                                           style: const TextStyle(
                                             fontSize: 14.0,
                                           ),
                                         ),
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          'Publishing Year: ${controller.bookDataList[index].publishingYear ?? 'Unknown'}',
-                                          style: const TextStyle(
-                                            fontSize: 14.0,
+                                      ],
+                                    ),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'Publisher: ${controller.bookDataList[index].publisher ?? 'Unknown'} ',
+                                            style: const TextStyle(
+                                              fontSize: 14.0,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                        Expanded(
+                                          child: Text(
+                                            'Publishing Year: ${controller.bookDataList[index].publishingYear ?? 'Unknown'}',
+                                            style: const TextStyle(
+                                              fontSize: 14.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
