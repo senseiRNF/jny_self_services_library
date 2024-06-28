@@ -82,8 +82,6 @@ class LockSettingPageController extends State<LockSettingPage> {
     }
   }
 
-  // Old Controller
-
   inputOldPIN(int inputtedNumber) async {
     if(oldPinController.text.isEmpty) {
       setState(() {
@@ -124,8 +122,6 @@ class LockSettingPageController extends State<LockSettingPage> {
     }
   }
 
-  // New Controller
-
   inputNewPIN(int inputtedNumber) async {
     if(newPinController.text.isEmpty) {
       setState(() {
@@ -152,8 +148,6 @@ class LockSettingPageController extends State<LockSettingPage> {
       });
     }
   }
-
-  // Conf Controller
 
   inputConfPIN(int inputtedNumber) async {
     if(confPinController.text.isEmpty) {

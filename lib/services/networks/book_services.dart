@@ -214,59 +214,6 @@ class BookServices {
     return result;
   }
 
-  // Future<List<BorrowHistoryDataJson>> showHistoryBorrow(String? studentId, String? employeeId) async {
-  //   List<BorrowHistoryDataJson> result = [];
-  //   LocalAccountJson? account;
-  //
-  //   await SharedPrefsFunctions.readData('account').then((accountResult) async {
-  //     if(accountResult != null) {
-  //       account = LocalAccountJson.fromJson(jsonDecode(accountResult));
-  //     }
-  //
-  //     await NetworkOption.initJNYAPI().then((dio) async {
-  //       LoadingDialog(context: context).show();
-  //
-  //       await dio.get(
-  //         '/library/loan-histories',
-  //         queryParameters: studentId != null ? {
-  //           'student_id': studentId,
-  //           'limit': 5,
-  //         } : employeeId != null ? {
-  //           'employee_id': employeeId,
-  //           'limit': 5,
-  //         } : {},
-  //         options: Options(
-  //           headers: {
-  //             'Authorization': 'Bearer ${account?.accessToken}',
-  //           },
-  //         ),
-  //       ).then((getResult) {
-  //         CloseBack(context: context).go();
-  //
-  //         if(getResult.statusCode == 200 || getResult.statusCode == 201) {
-  //           if(getResult.data != null) {
-  //             BorrowHistoryJson borrowHistoryJson = BorrowHistoryJson.fromJson(getResult.data!);
-  //
-  //             if(borrowHistoryJson.borrowHistoryDataJson != null) {
-  //               for(int i = 0; i < borrowHistoryJson.borrowHistoryDataJson!.length; i++) {
-  //                 result.add(borrowHistoryJson.borrowHistoryDataJson![i]);
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }).catchError((dioExc) {
-  //         CloseBack(context: context).go();
-  //
-  //         if(dioExc.response != null && dioExc.response!.statusCode != 404) {
-  //           ErrorHandler(context: context, dioExc: dioExc).show();
-  //         }
-  //       });
-  //     });
-  //   });
-  //
-  //   return result;
-  // }
-
   Future<bool> extendPeriodBook(int? borrowId, String untilDate, String? itemList, String? studentId, String? employeeId) async {
     bool result = false;
     LocalAccountJson? account;

@@ -203,9 +203,8 @@ class BluetoothSettingPageController extends State<BluetoothSettingPage> {
                         connectedDevice = device;
                       });
 
-                      MethodChannelNative(context: context).setDeviceToNative(device.remoteId.str).then((_) {
-                        CloseBack(context: context).go();
-                      });
+                      MethodChannelNative(context: context).setDeviceToNative(device.remoteId.str)
+                          .then((_) => CloseBack(context: context).go());
                     }
                   });
                 }

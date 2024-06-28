@@ -11,7 +11,7 @@ import 'package:jny_self_services_library/services/locals/functions/route_functi
 import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
-// import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
+import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
@@ -34,6 +34,7 @@ class ReturnPageController extends State<ReturnPage> {
 
   bool isOnListen = false;
   bool isAbleToProceed = false;
+  bool canPopPage = true;
 
   StreamSubscription? eventChannelStreamSubscription;
 
@@ -106,6 +107,8 @@ class ReturnPageController extends State<ReturnPage> {
   }
 
   startRFIDAuto() async {
+    changeOnListenStatus();
+
     setState(() {
       eventChannelStreamSubscription = const EventChannel('intidata.android/library_app_event').receiveBroadcastStream().listen((data) async {
         if(!scannedRFID.contains(data.toString().substring(0, 16))) {
@@ -233,63 +236,51 @@ class ReturnPageController extends State<ReturnPage> {
             }
           }
 
-          // await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((deleteAlarmResult) async {
-          //   if(deleteAlarmResult == true) {
-          //     await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
-          //       if(result == true) {
-          //         MoveTo(
-          //           context: context,
-          //           target: const ThanksPage(
-          //             type: 1,
-          //           ),
-          //           callback: (_) => CloseBack(context: context).go(),
-          //         ).go();
-          //       }
-          //     });
-          //   } else {
-          //     OkDialog(
-          //       context: context,
-          //       content: 'Failed to communicating with gate system, please try again!',
-          //       headIcon: false,
-          //       okPressed: () async => await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
-          //         closeBorrowedBooks();
-          //       }),
-          //     ).show();
-          //   }
-          // });
-
-          await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
-            if(result == true) {
-              MoveTo(
+          await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((deleteAlarmResult) async {
+            if(deleteAlarmResult == true) {
+              await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
+                if(result == true) {
+                  MoveTo(
+                    context: context,
+                    target: const ThanksPage(
+                      type: 1,
+                    ),
+                    callback: (_) => CloseBack(context: context).go(),
+                  ).go();
+                } else {
+                  await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
+                    closeBorrowedBooks();
+                  });
+                }
+              });
+            } else {
+              OkDialog(
                 context: context,
-                target: const ThanksPage(
-                  type: 1,
-                ),
-                callback: (_) => CloseBack(context: context).go(),
-              ).go();
+                content: 'Failed to communicating with gate system, please try again!',
+                headIcon: false,
+                okPressed: () async => await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
+                  closeBorrowedBooks();
+                }),
+              ).show();
             }
           });
         } else {
-          closeBorrowedBooks();
-
           OkDialog(
             context: context,
             content: 'Failed to Return!\n\nPlease do not remove books from Scanner before process is completed',
             headIcon: false,
-            okPressed: () => {},
+            okPressed: () => closeBorrowedBooks(),
           ).show();
         }
       });
     } else {
       CloseBack(context: context).go();
 
-      closeBorrowedBooks();
-
       OkDialog(
         context: context,
         content: 'Failed to Return!\n\nPlease put the books in the Scanner',
         headIcon: false,
-        okPressed: () => {},
+        okPressed: () => closeBorrowedBooks(),
       ).show();
     }
   }
@@ -311,6 +302,7 @@ class ReturnPageController extends State<ReturnPage> {
     setState(() {
       listBorrowedBooks = tempList;
       selectedBorrowedDetail = borrowedDetail;
+      canPopPage = false;
     });
 
     checkConnection().then((_) {
@@ -326,7 +318,7 @@ class ReturnPageController extends State<ReturnPage> {
 
           startRFIDAuto();
 
-          changeOnListenStatus();
+          popInstruction();
         }
       } else {
         OkDialog(
@@ -360,6 +352,7 @@ class ReturnPageController extends State<ReturnPage> {
     setState(() {
       listBorrowedBooks.clear();
       scannedRFID.clear();
+      isAbleToProceed = false;
     });
 
     List<Map<bool, BorrowedBooksDataJson>> tempList = [];
@@ -380,10 +373,66 @@ class ReturnPageController extends State<ReturnPage> {
     });
 
     DisplayMonitorServices.sendStateToMonitor(
-      "SHOW_RETURN",
+      "SHOW_RETURN_LIST",
       {
         "library_member": widget.libraryMemberData.toJson(),
         "book_list": tempConvertedList,
+      },
+    );
+  }
+
+  Future popInvoked(BuildContext context) async {
+    if(listBorrowedBooks.isNotEmpty) {
+      closeBorrowedBooks();
+
+      setState(() {
+        canPopPage = true;
+      });
+    }
+  }
+
+  popInstruction() {
+    showDialog(
+      context: context,
+      builder: (dialogBuilder) {
+        return Dialog(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Text(
+                  'Place the book in the scanner area to continue',
+                  style: TextStyle(
+                    fontSize: 28.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 6,
+                child: Image.asset(
+                  'assets/images/gifs/books.gif',
+                  fit: BoxFit.contain,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => CloseBack(context: context).go(),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10.0),
+                  child: Text(
+                    "OK",
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 10.0,
+              ),
+            ],
+          ),
+        );
       },
     );
   }

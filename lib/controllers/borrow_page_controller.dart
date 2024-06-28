@@ -241,53 +241,38 @@ class BorrowPageController extends State<BorrowPage> {
           }
         }
 
-        // await ControlGateServices(context: context).postAlarmToGate(epcList).then((postAlarmResult) async {
-        //   if(postAlarmResult == true) {
-        //     await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
-        //       if(result == true) {
-        //         MoveTo(
-        //           context: context,
-        //           target: const ThanksPage(
-        //             type: 0,
-        //           ),
-        //           callback: (_) => CloseBack(context: context).go(),
-        //         ).go();
-        //       } else {
-        //         await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
-        //           startRFIDAuto();
-        //         });
-        //       }
-        //     });
-        //   } else {
-        //     OkDialog(
-        //       context: context,
-        //       content: 'Failed to communicating with gate system, please try again!',
-        //       headIcon: false,
-        //       okPressed: () => {},
-        //     ).show();
-        //   }
-        // });
+        await ControlGateServices(context: context).postAlarmToGate(epcList).then((postAlarmResult) async {
+          if(postAlarmResult == true) {
+            await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
+              if(result == true) {
+                MoveTo(
+                  context: context,
+                  target: const ThanksPage(
+                    type: 0,
+                  ),
+                  callback: (_) => CloseBack(context: context).go(),
+                ).go();
+              } else {
+                clearScannedRFIDList();
 
-        await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
-          if(result == true) {
-            MoveTo(
-              context: context,
-              target: const ThanksPage(
-                type: 0,
-              ),
-              callback: (_) => CloseBack(context: context).go(),
-            ).go();
-          } else {
-            await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
-              startRFIDAuto();
+                await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
+                  startRFIDAuto();
+                }).catchError((_) => startRFIDAuto());
+              }
             });
+          } else {
+            clearScannedRFIDList();
+
+            OkDialog(
+              context: context,
+              content: 'Failed to communicating with gate system, please try again!',
+              headIcon: false,
+              okPressed: () => startRFIDAuto(),
+            ).show();
           }
         });
       } else {
-        setState(() {
-          scannedRFID.clear();
-          bookDataList.clear();
-        });
+        clearScannedRFIDList();
 
         OkDialog(
           context: context,

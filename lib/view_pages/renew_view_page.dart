@@ -190,24 +190,19 @@ class RenewViewPage extends StatelessWidget {
                           },
                         ) :
                         const Material(),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => controller.renewBook(controller.listBorrowedDetail[index]),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-                                  child: Text(
-                                    'Renew Books',
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                    ),
-                                  ),
-                                ),
+                        const SizedBox(
+                          height: 10.0,
+                        ),
+                        ElevatedButton(
+                          onPressed: () => controller.renewBook(controller.listBorrowedDetail[index]),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+                            child: Text(
+                              'Renew Books',
+                              style: TextStyle(
+                                fontSize: 16.0,
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],

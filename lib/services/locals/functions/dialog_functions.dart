@@ -48,9 +48,7 @@ class OkDialog {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                CloseBack(context: context).go();
-              },
+              onPressed: () => CloseBack(context: context).go(),
               child: const Text(
                 'OK',
               ),
@@ -102,17 +100,13 @@ class OptionDialog {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                CloseBack(context: context, callbackData: false).go();
-              },
+              onPressed: () => CloseBack(context: context, callbackData: false).go(),
               child: const Text(
                 'No',
               ),
             ),
             TextButton(
-              onPressed: () {
-                CloseBack(context: context, callbackData: true).go();
-              },
+              onPressed: () => CloseBack(context: context, callbackData: true).go(),
               child: const Text(
                 'Yes',
               ),
