@@ -219,7 +219,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                                 "    楊秀莲女士毕生刻己宽人，敦亲睦邻，亦为雅加达著名侨领之一。她倾力支持印华教育事业的发展，致力於争取和维护妇女的正当权益，广受社会各界的讚誉和爱戴。",
                               ),
                               const Text(
-                                "    汪氏家族热爱国家，服务社羣，为众所推崇。为旌其德，扬其喜爱阅读的学习精神,爰将该图书馆命名为“大均秀莲图书馆”特铭文为志。",
+                                "    汪氏家族热爱国家，服务社羣，为众所推崇。为旌其德，扬其喜爱阅读的学习精神,爰将该图书馆命名为“大均秀莲图书馆”,特铭文为志。",
                               ),
                               const SizedBox(
                                 height: 20.0,
@@ -228,7 +228,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                                 "雅加达南洋学校立",
                               ),
                               const Text(
-                                "二零二四年七月十九日",
+                                "二零二四年七月二十日",
                               ),
                             ],
                           ),
@@ -356,7 +356,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                                 ),
                               ),
                               const Text(
-                                "    汪氏家族热爱国家，服务社羣，为众所推崇。为旌其德，扬其喜爱阅读的学习精神,爰将该图书馆命名为“大均秀莲图书馆”特铭文为志。",
+                                "    汪氏家族热爱国家，服务社羣，为众所推崇。为旌其德，扬其喜爱阅读的学习精神,爰将该图书馆命名为“大均秀莲图书馆”,特铭文为志。",
                                 style: TextStyle(
                                   fontSize: 12.0,
                                 ),
@@ -371,7 +371,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                                 ),
                               ),
                               const Text(
-                                "二零二四年七月十九日",
+                                "二零二四年七月二十日",
                                 style: TextStyle(
                                   fontSize: 12.0,
                                 ),
