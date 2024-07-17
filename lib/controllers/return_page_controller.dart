@@ -34,7 +34,6 @@ class ReturnPageController extends State<ReturnPage> {
 
   bool isOnListen = false;
   bool isAbleToProceed = false;
-  bool canPopPage = true;
 
   StreamSubscription? eventChannelStreamSubscription;
 
@@ -164,6 +163,51 @@ class ReturnPageController extends State<ReturnPage> {
     }
   }
 
+  showBorrowedBooks(BorrowedDetailDataJson borrowedDetail) {
+    List<Map<bool, BorrowedBooksDataJson>> tempList = [];
+    List<Map> tempConvertedList = [];
+
+    if(borrowedDetail.books != null) {
+      for(int i = 0; i < borrowedDetail.books!.length; i++) {
+        tempList.add({false: borrowedDetail.books![i]});
+        tempConvertedList.add({
+          "scanned": false,
+          "book_data": borrowedDetail.books![i].toJson(),
+        });
+      }
+    }
+
+    setState(() {
+      listBorrowedBooks = tempList;
+      selectedBorrowedDetail = borrowedDetail;
+    });
+
+    checkConnection().then((_) {
+      if(connectedDevice != null) {
+        if(isOnListen == false) {
+          DisplayMonitorServices.sendStateToMonitor(
+            "SHOW_RETURN_LIST",
+            {
+              "library_member": widget.libraryMemberData.toJson(),
+              "book_list": tempConvertedList,
+            },
+          );
+
+          startRFIDAuto();
+
+          popInstruction();
+        }
+      } else {
+        OkDialog(
+          context: context,
+          content: 'Bluetooth not connected!',
+          headIcon: false,
+          okPressed: () => closeBorrowedBooks(),
+        ).show();
+      }
+    });
+  }
+
   returnBook(int borrowId) async {
     LoadingDialog(context: context).show();
 
@@ -240,6 +284,11 @@ class ReturnPageController extends State<ReturnPage> {
             if(deleteAlarmResult == true) {
               await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
                 if(result == true) {
+                  setState(() {
+                    listBorrowedBooks.clear();
+                    scannedRFID.clear();
+                  });
+
                   MoveTo(
                     context: context,
                     target: const ThanksPage(
@@ -283,52 +332,6 @@ class ReturnPageController extends State<ReturnPage> {
         okPressed: () => closeBorrowedBooks(),
       ).show();
     }
-  }
-
-  showBorrowedBooks(BorrowedDetailDataJson borrowedDetail) {
-    List<Map<bool, BorrowedBooksDataJson>> tempList = [];
-    List<Map> tempConvertedList = [];
-
-    if(borrowedDetail.books != null) {
-      for(int i = 0; i < borrowedDetail.books!.length; i++) {
-        tempList.add({false: borrowedDetail.books![i]});
-        tempConvertedList.add({
-          "scanned": false,
-          "book_data": borrowedDetail.books![i].toJson(),
-        });
-      }
-    }
-
-    setState(() {
-      listBorrowedBooks = tempList;
-      selectedBorrowedDetail = borrowedDetail;
-      canPopPage = false;
-    });
-
-    checkConnection().then((_) {
-      if(connectedDevice != null) {
-        if(isOnListen == false) {
-          DisplayMonitorServices.sendStateToMonitor(
-            "SHOW_RETURN_LIST",
-            {
-              "library_member": widget.libraryMemberData.toJson(),
-              "book_list": tempConvertedList,
-            },
-          );
-
-          startRFIDAuto();
-
-          popInstruction();
-        }
-      } else {
-        OkDialog(
-          context: context,
-          content: 'Bluetooth not connected!',
-          headIcon: false,
-          okPressed: () => closeBorrowedBooks(),
-        ).show();
-      }
-    });
   }
 
   closeBorrowedBooks() {
@@ -384,10 +387,6 @@ class ReturnPageController extends State<ReturnPage> {
   Future popInvoked(BuildContext context) async {
     if(listBorrowedBooks.isNotEmpty) {
       closeBorrowedBooks();
-
-      setState(() {
-        canPopPage = true;
-      });
     }
   }
 

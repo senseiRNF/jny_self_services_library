@@ -82,7 +82,7 @@ class CheckBookStatusSettingPageController extends State<CheckBookStatusSettingP
               setState(() {
                 isLoadingData = false;
               });
-            });;
+            });
           } else {
             setState(() {
               bookDataJson = null;

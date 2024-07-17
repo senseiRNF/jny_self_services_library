@@ -19,7 +19,7 @@ class LibraryInformationPageController extends State<LibraryInformationPage> {
   void initState() {
     super.initState();
 
-    for(int i = 2; i < 9; i++) {
+    for(int i = 2; i < 10; i++) {
       setState(() {
         libraryFacilityList.add(
           InkWell(
@@ -87,6 +87,9 @@ class LibraryInformationPageController extends State<LibraryInformationPage> {
           break;
         case "assets/images/library_info_8.png":
           selectedAsset = "INFO_8";
+          break;
+        case "assets/images/library_info_9.png":
+          selectedAsset = "INFO_9";
           break;
         default:
           selectedAsset = "INFORMATION";

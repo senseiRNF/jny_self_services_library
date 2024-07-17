@@ -26,7 +26,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Image.asset(
-                        "assets/images/library_info_3.png",
+                        "assets/images/library_info_4.png",
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                       ),
@@ -399,7 +399,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20.0),
                             image: const DecorationImage(
                               image: AssetImage(
-                                'assets/images/library_info_9.png',
+                                'assets/images/library_info_10.png',
                               ),
                               fit: BoxFit.contain,
                             ),
@@ -454,7 +454,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20.0),
                             image: const DecorationImage(
                               image: AssetImage(
-                                'assets/images/library_info_9.png',
+                                'assets/images/library_info_10.png',
                               ),
                               fit: BoxFit.contain,
                             ),
@@ -544,7 +544,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20.0),
                             image: const DecorationImage(
                               image: AssetImage(
-                                'assets/images/library_info_10.png',
+                                'assets/images/library_info_11.png',
                               ),
                               fit: BoxFit.contain,
                             ),
@@ -599,7 +599,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20.0),
                             image: const DecorationImage(
                               image: AssetImage(
-                                'assets/images/library_info_10.png',
+                                'assets/images/library_info_11.png',
                               ),
                               fit: BoxFit.contain,
                             ),
@@ -613,7 +613,7 @@ class LibraryInformationViewPage extends StatelessWidget {
                   height: 50.0,
                 ),
                 Text(
-                  "LIBRARY FACILITIES",
+                  "GALLERY",
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     fontSize: MediaQuery.of(context).orientation == Orientation.landscape

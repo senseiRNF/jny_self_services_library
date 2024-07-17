@@ -14,7 +14,9 @@ class ReturnViewPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: controller.canPopPage,
+      canPop: controller.listBorrowedBooks.isNotEmpty
+          ? false
+          : true,
       onPopInvoked: (_) async => await controller.popInvoked(context),
       child: Scaffold(
         appBar: AppBar(
