@@ -49,7 +49,7 @@ class CheckBookStatusSettingViewPage extends StatelessWidget {
                     ? 'Active' : 'Inactive'
                     : "No Data Found",
                 style: TextStyle(
-                  color: controller.bookDataJson != null ? controller.bookDataJson!.isAvailable != null && controller.bookDataJson!.isAvailable! == true ? Colors.green : Colors.red : Colors.black,
+                  color: controller.bookDataJson != null ? controller.bookDataJson!.isAvailable != null && controller.bookDataJson!.isAvailable! == true ? Colors.lightGreen : Colors.red : Colors.black,
                   fontSize: 24.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -216,7 +216,7 @@ class CheckBookStatusSettingViewPage extends StatelessWidget {
                                   style: TextStyle(
                                     color: controller.loanHistoryList[index].status != null
                                         ? controller.loanHistoryList[index].status!.toLowerCase() == "returned"
-                                        ? Colors.green
+                                        ? Colors.lightGreen
                                         : Theme.of(context).colorScheme.primary
                                         : Colors.black,
                                     fontSize: 20.0,

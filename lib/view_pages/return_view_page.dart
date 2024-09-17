@@ -63,18 +63,22 @@ class ReturnViewPage extends StatelessWidget {
                           const SizedBox(
                             height: 10.0,
                           ),
+                          controller.widget.libraryMemberData.nis != null ?
                           Text(
-                            controller.widget.libraryMemberData.nis ?? controller.widget.libraryMemberData.nik ?? '',
+                            controller.widget.libraryMemberData.nis!,
                             style: const TextStyle(
                               fontSize: 14.0,
                             ),
-                          ),
+                          ) :
+                          const Material(),
+                          controller.widget.libraryMemberData.className != null ?
                           Text(
-                            controller.widget.libraryMemberData.className ?? controller.widget.libraryMemberData.email ?? '',
+                            controller.widget.libraryMemberData.className!,
                             style: const TextStyle(
                               fontSize: 14.0,
                             ),
-                          ),
+                          ) :
+                          const Material(),
                         ],
                       ),
                     ),
@@ -191,6 +195,7 @@ class ReturnViewPage extends StatelessWidget {
                                       ],
                                     ),
                                   ),
+
                                 ],
                               );
                             },
@@ -229,6 +234,9 @@ class ReturnViewPage extends StatelessWidget {
                         return controller.listBorrowedBooks[index].values.first.bibliography != null ?
                         Card(
                           elevation: 5.0,
+                          color: controller.listBorrowedBooks[index].keys.first == true
+                              ? Colors.lightGreen
+                              : Colors.white,
                           child: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Row(
@@ -238,14 +246,18 @@ class ReturnViewPage extends StatelessWidget {
                                   width: 30.0,
                                   height: 30.0,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color: controller.listBorrowedBooks[index].keys.first == true
+                                        ? Colors.white
+                                        : Theme.of(context).colorScheme.primary,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
                                     child: Text(
                                       "${index + 1}",
-                                      style: const TextStyle(
-                                        color: Colors.white,
+                                      style: TextStyle(
+                                        color: controller.listBorrowedBooks[index].keys.first == true
+                                            ? Theme.of(context).colorScheme.primary
+                                            : Colors.white,
                                       ),
                                     ),
                                   ),
@@ -269,7 +281,10 @@ class ReturnViewPage extends StatelessWidget {
                                     children: [
                                       Text(
                                         controller.listBorrowedBooks[index].values.first.bibliography!.title ?? 'Unknown',
-                                        style: const TextStyle(
+                                        style: TextStyle(
+                                          color: controller.listBorrowedBooks[index].keys.first == true
+                                              ? Colors.white
+                                              : Colors.black,
                                           fontSize: 18.0,
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -279,7 +294,10 @@ class ReturnViewPage extends StatelessWidget {
                                       ),
                                       Text(
                                         "ISBN/ISSN: ${controller.listBorrowedBooks[index].values.first.bibliography!.isbnOrIssn ?? 'Unknown'}",
-                                        style: const TextStyle(
+                                        style: TextStyle(
+                                          color: controller.listBorrowedBooks[index].keys.first == true
+                                              ? Colors.white
+                                              : Colors.black,
                                           fontSize: 14.0,
                                         ),
                                       ),
@@ -289,9 +307,12 @@ class ReturnViewPage extends StatelessWidget {
                                       Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
+                                          Text(
                                             'Authors: ',
                                             style: TextStyle(
+                                              color: controller.listBorrowedBooks[index].keys.first == true
+                                                  ? Colors.white
+                                                  : Colors.black,
                                               fontSize: 14.0,
                                             ),
                                           ),
@@ -299,7 +320,10 @@ class ReturnViewPage extends StatelessWidget {
                                             controller.listBorrowedBooks[index].values.first.bibliography != null ?
                                             controller.listBorrowedBooks[index].values.first.bibliography!.authorNames ?? 'Unknown' :
                                             'Unknown',
-                                            style: const TextStyle(
+                                            style: TextStyle(
+                                              color: controller.listBorrowedBooks[index].keys.first == true
+                                                  ? Colors.white
+                                                  : Colors.black,
                                               fontSize: 14.0,
                                             ),
                                           ),
@@ -314,7 +338,10 @@ class ReturnViewPage extends StatelessWidget {
                                                   && controller.listBorrowedBooks[index].values.first.bibliography!.publisher != null ?
                                               controller.listBorrowedBooks[index].values.first.bibliography!.publisher!.name ?? 'Unknown' :
                                               "Unknown"} ',
-                                              style: const TextStyle(
+                                              style: TextStyle(
+                                                color: controller.listBorrowedBooks[index].keys.first == true
+                                                    ? Colors.white
+                                                    : Colors.black,
                                                 fontSize: 14.0,
                                               ),
                                             ),
@@ -324,7 +351,10 @@ class ReturnViewPage extends StatelessWidget {
                                               'Publishing Year: ${controller.listBorrowedBooks[index].values.first.bibliography != null ?
                                               controller.listBorrowedBooks[index].values.first.bibliography!.publishingYear ?? 'Unknown' :
                                               "Unknown"} ',
-                                              style: const TextStyle(
+                                              style: TextStyle(
+                                                color: controller.listBorrowedBooks[index].keys.first == true
+                                                    ? Colors.white
+                                                    : Colors.black,
                                                 fontSize: 14.0,
                                               ),
                                             ),
@@ -334,17 +364,14 @@ class ReturnViewPage extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(
-                                  width: 10.0,
-                                ),
-                                controller.listBorrowedBooks[index].keys.first == true ?
-                                const Icon(
-                                  Icons.check_circle,
-                                  color: Colors.green,
-                                ) :
-                                const Icon(
-                                  Icons.close,
-                                  color: Colors.red,
+                                Icon(
+                                  controller.listBorrowedBooks[index].keys.first == true
+                                      ? Icons.check_circle
+                                      : Icons.close,
+                                  color: controller.listBorrowedBooks[index].keys.first == true
+                                      ? Colors.white
+                                      : Colors.red,
+                                  size: 30.0,
                                 ),
                               ],
                             ),

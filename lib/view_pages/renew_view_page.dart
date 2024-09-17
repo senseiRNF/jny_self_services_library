@@ -58,18 +58,22 @@ class RenewViewPage extends StatelessWidget {
                         const SizedBox(
                           height: 10.0,
                         ),
+                        controller.widget.libraryMemberData.nis != null ?
                         Text(
-                          controller.widget.libraryMemberData.nis ?? controller.widget.libraryMemberData.nik ?? '',
+                          controller.widget.libraryMemberData.nis!,
                           style: const TextStyle(
                             fontSize: 14.0,
                           ),
-                        ),
+                        ) :
+                        const Material(),
+                        controller.widget.libraryMemberData.className != null ?
                         Text(
-                          controller.widget.libraryMemberData.className ?? controller.widget.libraryMemberData.email ?? '',
+                          controller.widget.libraryMemberData.className!,
                           style: const TextStyle(
                             fontSize: 14.0,
                           ),
-                        ),
+                        ) :
+                        const Material(),
                       ],
                     ),
                   ),

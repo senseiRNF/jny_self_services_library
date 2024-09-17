@@ -26,7 +26,7 @@ class OkDialog {
           headIcon! == true ?
           const Icon(
             Icons.mood,
-            color: Colors.green,
+            color: Colors.lightGreen,
           ) :
           const Icon(
             Icons.mood_bad,
@@ -39,7 +39,7 @@ class OkDialog {
           title: Text(
             title != null ? title! : headIcon != null ? headIcon! == true ? 'Success' : 'Failed' : 'Attention',
             style: TextStyle(
-              color: title != null ? Colors.black : headIcon != null ? headIcon! == true ? Colors.green : Colors.red : Colors.black,
+              color: title != null ? Colors.black : headIcon != null ? headIcon! == true ? Colors.lightGreen : Colors.red : Colors.black,
             ),
           ),
           content: Text(

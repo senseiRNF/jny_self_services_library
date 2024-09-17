@@ -56,7 +56,7 @@ class HealthCheckViewPage extends StatelessWidget {
                       ? Icons.check
                       : Icons.close,
                   color: controller.isBluetoothConnect
-                      ? Colors.green
+                      ? Colors.lightGreen
                       : Colors.red,
                 ),
               ],
@@ -72,7 +72,7 @@ class HealthCheckViewPage extends StatelessWidget {
                       ? Icons.check
                       : Icons.close,
                   color: controller.isGateServerConnected
-                      ? Colors.green
+                      ? Colors.lightGreen
                       : Colors.red,
                 ),
               ],
@@ -88,7 +88,7 @@ class HealthCheckViewPage extends StatelessWidget {
                       ? Icons.check
                       : Icons.close,
                   color: controller.isMonitorConnected
-                      ? Colors.green
+                      ? Colors.lightGreen
                       : Colors.red,
                 ),
               ],

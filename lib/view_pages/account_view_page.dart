@@ -92,18 +92,22 @@ class AccountViewPage extends StatelessWidget {
                                             const SizedBox(
                                               height: 20.0,
                                             ),
+                                            controller.widget.libraryMemberData.nis != null ?
                                             Text(
-                                              controller.widget.libraryMemberData.nis ?? controller.widget.libraryMemberData.nik ?? '',
+                                              controller.widget.libraryMemberData.nis!,
                                               style: const TextStyle(
                                                 fontSize: 16.0,
                                               ),
-                                            ),
+                                            ) :
+                                            const Material(),
+                                            controller.widget.libraryMemberData.className != null ?
                                             Text(
-                                              controller.widget.libraryMemberData.className ?? controller.widget.libraryMemberData.email ?? '',
+                                              controller.widget.libraryMemberData.className!,
                                               style: const TextStyle(
                                                 fontSize: 16.0,
                                               ),
-                                            ),
+                                            ) :
+                                            const Material(),
                                           ],
                                         ),
                                       ),
@@ -401,7 +405,7 @@ class AccountViewPage extends StatelessWidget {
                                                 controller.historyList[index].status ?? "Unknown Status",
                                                 style: const TextStyle(
                                                   fontWeight: FontWeight.w700,
-                                                  color: Colors.green,
+                                                  color: Colors.lightGreen,
                                                 ),
                                               ),
                                             ],
