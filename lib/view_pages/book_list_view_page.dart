@@ -280,6 +280,22 @@ class BookListViewPage extends StatelessWidget {
                                       ),
                                     ],
                                   ),
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Call Number: ',
+                                      ),
+                                      Expanded(
+                                        flex: 6,
+                                        child: Text(
+                                          controller.bookList[index].callNumber ?? '-',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

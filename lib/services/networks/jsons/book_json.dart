@@ -69,6 +69,7 @@ class BookDataJson {
   String? authorNames;
   String? publisher;
   String? mediaPath;
+  String? callNumber;
 
   BookDataJson({
     this.id,
@@ -87,7 +88,8 @@ class BookDataJson {
     this.type,
     this.authorNames,
     this.publisher,
-    this.mediaPath
+    this.mediaPath,
+    this.callNumber,
   });
 
   BookDataJson.fromJson(Map<String, dynamic> json) {
@@ -108,6 +110,7 @@ class BookDataJson {
     authorNames = json['author_names'];
     publisher = json['publisher'];
     mediaPath = json['media_path'];
+    callNumber = json['call_number'];
   }
 
   Map<String, dynamic> toJson() {
@@ -129,6 +132,7 @@ class BookDataJson {
     data['author_names'] = authorNames;
     data['publisher'] = publisher;
     data['media_path'] = mediaPath;
+    data['call_number'] = callNumber;
     return data;
   }
 }
