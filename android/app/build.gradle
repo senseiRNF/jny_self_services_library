@@ -40,7 +40,7 @@ if (flutterTargetSdkVersion == null) {
 android {
     namespace "com.intidata.jny_self_services_library"
     compileSdk flutterCompileSdkVersion.toInteger()
-    ndkVersion "26.2.11394342"
+    ndkVersion "27.0.12077973"
 
     //    compileOptions {
     //        sourceCompatibility JavaVersion.VERSION_1_8
