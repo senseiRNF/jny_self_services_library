@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/library_information_page_controller.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class LibraryInformationViewPage extends StatelessWidget {
   final LibraryInformationPageController controller;
@@ -41,7 +42,9 @@ class LibraryInformationViewPage extends StatelessWidget {
                         height: MediaQuery.of(context).orientation == Orientation.landscape
                             ? MediaQuery.of(context).size.height / 12
                             : MediaQuery.of(context).size.height / 16,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.primary.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                     ),
                   ],
@@ -62,7 +65,9 @@ class LibraryInformationViewPage extends StatelessWidget {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => controller.onBackPressed(),
+                            onTap: () => LocalRouteNavigator.closeBack(
+                              context: context,
+                            ),
                             customBorder: const CircleBorder(),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
@@ -131,7 +136,9 @@ class LibraryInformationViewPage extends StatelessWidget {
                                           width: MediaQuery.of(context).size.width / 3,
                                           height: MediaQuery.of(context).size.height / 2.5,
                                           decoration: BoxDecoration(
-                                            color: const Color(0xff5d3267).withOpacity(0.15),
+                                            color: const Color(0xff5d3267).withValues(
+                                              alpha: 0.15,
+                                            ),
                                             borderRadius: BorderRadius.circular(30.0),
                                           ),
                                         ),
@@ -144,7 +151,9 @@ class LibraryInformationViewPage extends StatelessWidget {
                                           width: MediaQuery.of(context).size.width / 3,
                                           height: MediaQuery.of(context).size.height / 2.5,
                                           decoration: BoxDecoration(
-                                            color: const Color(0xff7c7ce1).withOpacity(0.15),
+                                            color: const Color(0xff7c7ce1).withValues(
+                                              alpha: 0.15,
+                                            ),
                                             borderRadius: BorderRadius.circular(30.0),
                                           ),
                                         ),
@@ -259,7 +268,9 @@ class LibraryInformationViewPage extends StatelessWidget {
                                           width: MediaQuery.of(context).size.width / 3,
                                           height: MediaQuery.of(context).size.height / 5.5,
                                           decoration: BoxDecoration(
-                                            color: const Color(0xff5d3267).withOpacity(0.15),
+                                            color: const Color(0xff5d3267).withValues(
+                                              alpha: 0.15,
+                                            ),
                                             borderRadius: BorderRadius.circular(20.0),
                                           ),
                                         ),
@@ -272,7 +283,9 @@ class LibraryInformationViewPage extends StatelessWidget {
                                           width: MediaQuery.of(context).size.width / 3,
                                           height: MediaQuery.of(context).size.height / 5.5,
                                           decoration: BoxDecoration(
-                                            color: const Color(0xff7c7ce1).withOpacity(0.15),
+                                            color: const Color(0xff7c7ce1).withValues(
+                                              alpha: 0.15,
+                                            ),
                                             borderRadius: BorderRadius.circular(20.0),
                                           ),
                                         ),

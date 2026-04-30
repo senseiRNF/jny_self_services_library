@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/dropdown_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/language_list_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/subjects_list_json.dart';
 import 'package:jny_self_services_library/view_pages/book_list_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class BookListPage extends StatefulWidget {
   const BookListPage({super.key});
@@ -45,10 +45,21 @@ class BookListPageController extends State<BookListPage> {
   void initState() {
     super.initState();
 
-    loadLanguage().then((_) => loadSubjects().then((_) async => loadBookList()));
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await loadLanguage();
+
+      await loadSubjects();
+
+      await loadBookList();
+    });
   }
 
-  loadBookList() async => await BookServices(context: context).showBookByFilter(searchQueryTEC.text).then((bookResult) {
+  Future loadBookList() async {
+    List<BookDataJson> bookResult = await BookServices.showBookByFilter(
+      context: context,
+      parameter: searchQueryTEC.text,
+    );
+
     if(selectedSubject.id != 0 || selectedLanguage.id != 0) {
       List<BookDataJson> tempBookList = [];
 
@@ -98,47 +109,55 @@ class BookListPageController extends State<BookListPage> {
         bookList = bookResult;
       });
     }
-  });
+  }
 
   Future loadLanguage() async {
-    List<LanguageListDataJson> tempLanguageList = [];
+    List<LanguageListDataJson> tempLanguageList = [
+      LanguageListDataJson(
+        id: 0,
+        name: "All Language",
+      ),
+    ];
 
-    await BookServices(context: context).showAllLanguage().then((languageResult) {
-      tempLanguageList.add(
-        LanguageListDataJson(
-          id: 0,
-          name: "All Language",
-        ),
-      );
+    List<LanguageListDataJson> languageResult = await BookServices.showAllLanguage(
+      context: context
+    );
 
-      tempLanguageList.addAll(languageResult);
-    });
+    for(LanguageListDataJson data in languageResult) {
+      tempLanguageList.add(data);
+    }
 
-    setState(() {
-      languageList = tempLanguageList;
-    });
+    if(mounted) {
+      setState(() {
+        languageList = tempLanguageList;
+      });
+    }
   }
 
   Future loadSubjects() async {
-    List<SubjectListDataJson> tempSubjectList = [];
+    List<SubjectListDataJson> tempSubjectList = [
+      SubjectListDataJson(
+        id: 0,
+        name: "All Subjects",
+      ),
+    ];
 
-    await BookServices(context: context).showAllSubjects().then((subjectResult) {
-      tempSubjectList.add(
-        SubjectListDataJson(
-          id: 0,
-          name: "All Subjects",
-        ),
-      );
+    List<SubjectListDataJson> subjectResult = await BookServices.showAllSubjects(
+      context: context
+    );
 
-      tempSubjectList.addAll(subjectResult);
-    });
+    for(SubjectListDataJson data in subjectResult) {
+      tempSubjectList.add(data);
+    }
 
-    setState(() {
-      subjectList = tempSubjectList;
-    });
+    if(mounted) {
+      setState(() {
+        subjectList = tempSubjectList;
+      });
+    }
   }
 
-  showBookDetail(BookDataJson bookData) async {
+  void showBookDetail(BookDataJson bookData) async {
     DisplayMonitorServices.sendStateToMonitor(
       "SHOW_BOOK_DETAIL",
       {
@@ -148,14 +167,14 @@ class BookListPageController extends State<BookListPage> {
     );
   }
 
-  openSubjectList() => MoveTo(
+  void openSubjectList() => LocalRouteNavigator.moveTo(
     context: context,
     target: DropdownPage(
       title: "Subjects List",
       subjectList: subjectList,
     ),
-    callback: (subject) {
-      if(subject != null) {
+    callbackFunction: (subject) {
+      if(mounted && subject != null) {
         setState(() {
           selectedSubject = subject;
         });
@@ -163,16 +182,16 @@ class BookListPageController extends State<BookListPage> {
         loadBookList();
       }
     }
-  ).go();
+  );
 
-  openLanguageList() => MoveTo(
+  void openLanguageList() => LocalRouteNavigator.moveTo(
       context: context,
       target: DropdownPage(
         title: "Language List",
         languageList: languageList,
       ),
-      callback: (language) {
-        if(language != null) {
+      callbackFunction: (language) {
+        if(mounted && language != null) {
           setState(() {
             selectedLanguage = language;
           });
@@ -180,7 +199,7 @@ class BookListPageController extends State<BookListPage> {
           loadBookList();
         }
       }
-  ).go();
+  );
 
   @override
   Widget build(BuildContext context) {

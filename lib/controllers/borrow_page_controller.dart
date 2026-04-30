@@ -6,9 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/controllers/thanks_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
 import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
@@ -16,6 +14,7 @@ import 'package:jny_self_services_library/services/networks/display_monitor_serv
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/view_pages/borrow_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class BorrowPage extends StatefulWidget {
   final LibraryMemberData libraryMemberData;
@@ -50,20 +49,47 @@ class BorrowPageController extends State<BorrowPage> {
   void initState() {
     super.initState();
 
-    if(widget.libraryMemberData.nis != null) {
-      checkUntilDate().then((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if(widget.libraryMemberData.nis != null) {
+        await checkUntilDate();
+
+        await checkConnection();
+
+        if(connectedDevice != null) {
+          if(isOnListen == false) {
+            startRFIDAuto();
+          }
+        } else if(mounted) {
+          LocalDialogFunction.okDialog(
+            context: context,
+            contentText: 'Bluetooth not connected!',
+            onClose: () => LocalRouteNavigator.closeBack(
+              context: context,
+            ),
+          );
+        }
+
+        DisplayMonitorServices.sendStateToMonitor(
+          "READ_RFID",
+          {
+            "library_member": widget.libraryMemberData.toJson(),
+            "book_list": {},
+          },
+        );
+      } else if(widget.libraryMemberData.nik != null) {
         checkConnection().then((_) {
           if(connectedDevice != null) {
             if(isOnListen == false) {
               startRFIDAuto();
             }
-          } else {
-            OkDialog(
+          } else if(mounted) {
+            LocalDialogFunction.okDialog(
               context: context,
-              content: 'Bluetooth not connected!',
-              headIcon: false,
-              okPressed: () => CloseBack(context: context).go(),
-            ).show();
+              contentText: 'Bluetooth not connected!',
+              onClose: () => LocalRouteNavigator.closeBack(
+                context: context,
+              ),
+            );
           }
         });
 
@@ -74,95 +100,94 @@ class BorrowPageController extends State<BorrowPage> {
             "book_list": {},
           },
         );
-      });
-    } else if(widget.libraryMemberData.nik != null) {
-      checkConnection().then((_) {
-        if(connectedDevice != null) {
-          if(isOnListen == false) {
-            startRFIDAuto();
-          }
-        } else {
-          OkDialog(
-            context: context,
-            content: 'Bluetooth not connected!',
-            headIcon: false,
-            okPressed: () => CloseBack(context: context).go(),
-          ).show();
-        }
-      });
-
-      DisplayMonitorServices.sendStateToMonitor(
-        "READ_RFID",
-        {
-          "library_member": widget.libraryMemberData.toJson(),
-          "book_list": {},
-        },
-      );
-    }
+      }
+    });
   }
 
   Future checkConnection() async {
-    await SharedPrefsFunctions.readData('bluetooth').then((bt) {
-      if(bt != null) {
-        LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(jsonDecode(bt));
+    String? bt = await LocalSecureStorage.readKey(
+      key: StaticVariables.bluetoothKey,
+    );
 
-        if(btJson.bluetoothRemoteId != null) {
-          connectedDevice = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!));
-        }
+    if(bt != null) {
+      LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(jsonDecode(bt));
+
+      if(btJson.bluetoothRemoteId != null) {
+        connectedDevice = BluetoothDevice(
+          remoteId: DeviceIdentifier(
+            btJson.bluetoothRemoteId!,
+          ),
+        );
       }
-    });
+    }
   }
 
-  checkUntilDate() async {
-    await BookServices(context: context).showUntilDate(fromDate, 14).then((dateResult) {
-      if(dateResult != null) {
-        setState(() {
-          untilDate = dateResult;
-        });
-      }
-    });
+  Future checkUntilDate() async {
+    String? dateResult = await BookServices.showUntilDate(
+      context: context, 
+      startDate: fromDate, 
+      duration: 14,
+    );
+
+    if(dateResult != null) {
+      setState(() {
+        untilDate = dateResult;
+      });
+    }
   }
 
-  changeOnListenStatus() {
-    setState(() {
-      isOnListen = !isOnListen;
-    });
+  void changeOnListenStatus() {
+    if(mounted) {
+      setState(() {
+        isOnListen = !isOnListen;
+      });
+    }
   }
 
-  startRFIDAuto() async {
+  void startRFIDAuto() async {
     changeOnListenStatus();
 
-    setState(() {
-      eventChannelStreamSubscription = const EventChannel('intidata.android/library_app_event').receiveBroadcastStream().listen((data) async {
-        if(!scannedRFID.contains(data.toString().substring(0, 16))) {
-          setState(() {
-            scannedRFID.add(data.toString().substring(0, 16));
-          });
+    if(mounted) {
+      setState(() {
+        eventChannelStreamSubscription =
+            const EventChannel('intidata.android/library_app_event')
+                .receiveBroadcastStream()
+                .listen((data) async {
+              if (!scannedRFID.contains(data.toString().substring(0, 16))) {
+                setState(() {
+                  scannedRFID.add(data.toString().substring(0, 16));
+                });
 
-          await BookServices(context: context).showBookByRFID(data.toString().substring(0, 16)).then((bookResult) {
-            if(bookResult != null && bookResult.isAvailable == true) {
-              setState(() {
-                bookDataList.add(bookResult);
-              });
+                if(mounted) {
+                  BookDataJson? bookResult = await BookServices.showBookByRFID(
+                    context: context,
+                    rfid: data.toString().substring(0, 16),
+                  );
 
-              List<Map> tempBookDataList = [];
+                  if (mounted && bookResult != null && bookResult.isAvailable == true) {
+                    setState(() {
+                      bookDataList.add(bookResult);
+                    });
 
-              for(int i = 0; i < bookDataList.length; i++) {
-                tempBookDataList.add(bookDataList[i].toJson());
+                    List<Map> tempBookDataList = [];
+
+                    for (int i = 0; i < bookDataList.length; i++) {
+                      tempBookDataList.add(bookDataList[i].toJson());
+                    }
+
+                    DisplayMonitorServices.sendStateToMonitor(
+                      "READ_RFID",
+                      {
+                        "library_member": widget.libraryMemberData.toJson(),
+                        "book_list": tempBookDataList,
+                      },
+                    );
+                  }
+                }
               }
-
-              DisplayMonitorServices.sendStateToMonitor(
-                "READ_RFID",
-                {
-                  "library_member": widget.libraryMemberData.toJson(),
-                  "book_list": tempBookDataList,
-                },
-              );
-            }
-          });
-        }
+            });
       });
-    });
+    }
   }
 
   Future cancelRFIDAuto() async {
@@ -176,7 +201,7 @@ class BorrowPageController extends State<BorrowPage> {
   }
 
   Future borrowBook() async {
-    LoadingDialog(context: context).show();
+    LocalDialogFunction.loadingDialog(context: context);
 
     if(isOnListen) {
       cancelRFIDAuto();
@@ -218,7 +243,9 @@ class BorrowPageController extends State<BorrowPage> {
     });
 
     Future.delayed(const Duration(seconds: 3), () async {
-      CloseBack(context: context).go();
+      if(mounted) {
+        LocalRouteNavigator.closeBack(context: context); 
+      }
 
       tempEventChannelStreamSubscription.cancel();
 
@@ -240,55 +267,84 @@ class BorrowPageController extends State<BorrowPage> {
             epcList.add(bookDataList[i].rfidTag!);
           }
         }
+        
+        if(mounted) {
+          bool postAlarmResult = await ControlGateServices.postAlarmToGate(
+            context: context,
+            epc: epcList,
+          );
 
-        await ControlGateServices(context: context).postAlarmToGate(epcList).then((postAlarmResult) async {
-          if(postAlarmResult == true) {
-            await BookServices(context: context).borrowBook(fromDate, untilDate, itemList, studentId, employeeId).then((result) async {
-              if(result == true) {
-                MoveTo(
-                  context: context,
-                  target: const ThanksPage(
-                    type: 0,
-                  ),
-                  callback: (_) => CloseBack(context: context).go(),
-                ).go();
-              } else {
-                clearScannedRFIDList();
+          if (mounted && postAlarmResult == true) {
+            bool borrowResult = await BookServices.borrowBook(
+              context: context,
+              fromDate: fromDate,
+              untilDate: untilDate,
+              itemList: itemList,
+              studentId: studentId,
+              employeeId: employeeId,
+            );
 
-                await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((_) {
+            if (mounted && borrowResult == true) {
+              LocalRouteNavigator.moveTo(
+                context: context,
+                target: const ThanksPage(
+                  type: 0,
+                ),
+                callbackFunction: (_) {
+                  LocalRouteNavigator.closeBack(context: context);
+                },
+              );
+            } else {
+              clearScannedRFIDList();
+              
+              try {
+                if(mounted) {
+                  await ControlGateServices.deleteAlarmFromGate(
+                    context: context,
+                    epc: epcList,
+                  );
+                  
                   startRFIDAuto();
-                }).catchError((_) => startRFIDAuto());
+                }
+              } catch(e) {
+                debugPrint("err $e");
+                
+                startRFIDAuto();
               }
-            });
+            }
           } else {
             clearScannedRFIDList();
 
-            OkDialog(
-              context: context,
-              content: 'Failed to communicating with gate system, please try again!',
-              headIcon: false,
-              okPressed: () => startRFIDAuto(),
-            ).show();
+            if(mounted) {
+              LocalDialogFunction.okDialog(
+                context: context,
+                contentText: 'Failed to communicating with gate system, please try again!',
+                onClose: () => startRFIDAuto(),
+              );
+            }
           }
-        });
+        }
       } else {
         clearScannedRFIDList();
 
-        OkDialog(
-          context: context,
-          content: 'Please do not remove books from Scanner before process is completed!',
-          headIcon: false,
-          okPressed: () => startRFIDAuto(),
-        ).show();
+        if(mounted) {
+          LocalDialogFunction.okDialog(
+            context: context,
+            contentText: 'Please do not remove books from Scanner before process is completed!',
+            onClose: () => startRFIDAuto(),
+          );
+        }
       }
     });
   }
 
-  clearScannedRFIDList() {
-    setState(() {
-      scannedRFID.clear();
-      bookDataList.clear();
-    });
+  void clearScannedRFIDList() {
+    if(mounted) {
+      setState(() {
+        scannedRFID.clear();
+        bookDataList.clear();
+      });
+    }
 
     DisplayMonitorServices.sendStateToMonitor(
       "READ_RFID",
@@ -299,34 +355,35 @@ class BorrowPageController extends State<BorrowPage> {
     );
   }
 
-  checkIfStudentBorrow() {
+  void checkIfStudentBorrow() {
     if(widget.libraryMemberData.nis != null) {
       borrowBook();
     } else if(widget.libraryMemberData.nik != null) {
-      OkDialog(
+      LocalDialogFunction.okDialog(
         context: context,
-        content: "Select return date before proceed",
-        okPressed: () => showDatePicker(
-          context: context,
-          firstDate: DateTime.now(),
-          lastDate: DateTime(2080),
-          helpText: "RETURN DATE",
-        ).then((datePicked) {
-          if(datePicked != null) {
+        contentText: "Select return date before proceed",
+        onClose: () async {
+          DateTime? datePicked = await showDatePicker(
+            context: context,
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2080),
+            helpText: "RETURN DATE",
+          );
+
+          if(mounted && datePicked != null) {
             setState(() {
               untilDate = DateFormat("yyyy-MM-dd").format(datePicked);
             });
 
             borrowBook();
-          } else {
-            OkDialog(
+          } else if(mounted) {
+            LocalDialogFunction.okDialog(
               context: context,
-              content: 'Please select returning date before proceed',
-              headIcon: false,
-            ).show();
+              contentText: 'Please select returning date before proceed',
+            );
           }
-        }),
-      ).show();
+        },
+      );
     }
   }
 

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/alarm_gate_logs_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/view_pages/alarm_gate_setup_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class AlarmGateSetupPage extends StatefulWidget {
   const AlarmGateSetupPage({super.key});
@@ -19,51 +18,59 @@ class AlarmGateSetupPageController extends State<AlarmGateSetupPage> {
   void initState() {
     super.initState();
 
-    checkGateURL();
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkGateURL());
   }
 
-  checkGateURL() async {
-    await SharedPrefsFunctions.readData("gate_url").then((gateURL) {
-      if(gateURL != null) {
+  void checkGateURL() async {
+    String? gateURL = await LocalSecureStorage.readKey(
+      key: StaticVariables.gateURLKey,
+    );
+
+    if(mounted && gateURL != null) {
+      setState(() {
         gateURLTEC.text = gateURL;
-      }
-    });
+      });
+    }
   }
 
-  saveGateURL() async {
-    await SharedPrefsFunctions.writeData("gate_url", gateURLTEC.text).then((writeURL) {
-      if(writeURL == true) {
-        OkDialog(
+  void saveGateURL() async {
+    bool writeResult = await LocalSecureStorage.writeKey(
+      key: StaticVariables.gateURLKey,
+      data: gateURLTEC.text,
+    );
+
+    if(mounted && writeResult) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Success saving Server Gate URL",
+        onClose: (_) => LocalRouteNavigator.closeBack(
           context: context,
-          content: "Success saving Server Gate URL",
-          headIcon: true,
-          okPressed: () => CloseBack(context: context).go(),
-        ).show();
-      } else {
-        OkDialog(
-          context: context,
-          content: "Failed to save Server Gate URL",
-          headIcon: false,
-        ).show();
-      }
-    });
+        ),
+      );
+    } else if(mounted) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Failed to save Server Gate URL",
+      );
+    }
   }
 
-  moveToAlarmLogs() async {
-    await SharedPrefsFunctions.readData("gate_url").then((gateURL) {
-      if(gateURL != null && gateURL != '') {
-        MoveTo(
-          context: context,
-          target: const AlarmGateLogsPage(),
-        ).go();
-      } else {
-        OkDialog(
-          context: context,
-          content: "Failed to open logs, please connect to server gate and try again",
-          headIcon: false,
-        ).show();
-      }
-    });
+  void moveToAlarmLogs() async {
+    String? gateURL = await LocalSecureStorage.readKey(
+      key: StaticVariables.gateURLKey,
+    );
+
+    if(mounted && gateURL != null && gateURL != '') {
+      LocalRouteNavigator.moveTo(
+        context: context,
+        target: const AlarmGateLogsPage(),
+      );
+    } else if(mounted) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Failed to open logs, please connect to server gate and try again",
+      );
+    }
   }
 
   @override

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/view_pages/library_information_view_page.dart';
 
@@ -19,30 +18,34 @@ class LibraryInformationPageController extends State<LibraryInformationPage> {
   void initState() {
     super.initState();
 
-    for(int i = 2; i < 10; i++) {
-      setState(() {
-        libraryFacilityList.add(
-          InkWell(
-            onTap: () => showFullImage('assets/images/library_info_$i.png'),
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                    "assets/images/library_info_$i.png",
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for(int i = 2; i < 10; i++) {
+        if(mounted) {
+          setState(() {
+            libraryFacilityList.add(
+              InkWell(
+                onTap: () => showFullImage('assets/images/library_info_$i.png'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                        "assets/images/library_info_$i.png",
+                      ),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-          ),
-        );
-      });
-    }
+            );
+          });
+        }
+      }
 
-    loadLibraryInformation();
+      loadLibraryInformation();
+    });
   }
 
-  loadLibraryInformation() async {
+  void loadLibraryInformation() async {
     DisplayMonitorServices.sendStateToMonitor(
       "INFORMATION",
       {
@@ -52,13 +55,11 @@ class LibraryInformationPageController extends State<LibraryInformationPage> {
     );
   }
 
-  imageLibraryFacilitiesOnChange(int index) => setState(() {
+  void imageLibraryFacilitiesOnChange(int index) => mounted ? setState(() {
     imageIndex = index;
-  });
+  }) : {};
 
-  onBackPressed() => CloseBack(context: context).go();
-
-  showFullImage(String assetPath) => showDialog(
+  void showFullImage(String assetPath) => showDialog(
     context: context,
     builder: (dialogContext) {
       String selectedAsset;

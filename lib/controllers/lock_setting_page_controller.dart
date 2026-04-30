@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/view_pages/lock_setting_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class LockSettingPage extends StatefulWidget {
   final bool? updatePIN;
@@ -31,108 +30,119 @@ class LockSettingPageController extends State<LockSettingPage> {
   void initState() {
     super.initState();
 
-    checkPIN();
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkPIN());
   }
 
-  checkPIN() async {
-    await SharedPrefsFunctions.readData('pin').then((pin) async {
-      if(pin == null) {
-        await SharedPrefsFunctions.writeData('pin', '000000');
-      }
-    });
+  void checkPIN() async {
+    String? pin = await LocalSecureStorage.readKey(
+      key: StaticVariables.pinKey,
+    );
+
+    if(pin == null) {
+      await LocalSecureStorage.writeKey(
+        key: StaticVariables.pinKey,
+        data: "000000",
+      );
+    }
   }
 
-  inputPIN(int inputtedNumber) async {
-    if(pinController.text.isEmpty) {
+  void inputPIN(int inputtedNumber) async {
+    if(mounted && pinController.text.isEmpty) {
       setState(() {
         pinController.text = inputtedNumber.toString();
       });
-    } else if(pinController.text.length < 6) {
+    } else if(mounted && pinController.text.length < 6) {
       setState(() {
         pinController.text = pinController.text + inputtedNumber.toString();
       });
 
       if(pinController.text.length == 6) {
-        await SharedPrefsFunctions.readData('pin').then((pin) {
-          if(pin != null && pinController.text == pin) {
-            CloseBack(
-              context: context,
-              callbackData: true,
-            ).go();
-          } else {
-            OkDialog(
-              context: context,
-              content: 'Wrong combination of lock PIN',
-              headIcon: false,
-              okPressed: () => setState(() {
-                pinController.text = '';
-              }),
-            ).show();
-          }
-        });
+        String? pin = await LocalSecureStorage.readKey(
+          key: StaticVariables.pinKey,
+        );
+
+        if(mounted && pin != null && pinController.text == pin) {
+          LocalRouteNavigator.closeBack(
+            context: context,
+            callbackResult: true,
+          );
+        } else if(mounted) {
+          LocalDialogFunction.okDialog(
+            context: context,
+            contentText: 'Wrong combination of lock PIN',
+            onClose: () {
+              if(mounted) {
+                setState(() {
+                  pinController.text = '';
+                });
+              }
+            },
+          );
+        }
       }
     }
   }
 
-  erasePIN() {
-    if(pinController.text.isNotEmpty) {
+  void erasePIN() {
+    if(mounted && pinController.text.isNotEmpty) {
       setState(() {
         pinController.text = pinController.text.substring(0, pinController.text.length - 1);
       });
     }
   }
 
-  inputOldPIN(int inputtedNumber) async {
-    if(oldPinController.text.isEmpty) {
+  void inputOldPIN(int inputtedNumber) async {
+    if(mounted && oldPinController.text.isEmpty) {
       setState(() {
         oldPinController.text = inputtedNumber.toString();
       });
-    } else if(oldPinController.text.length < 6) {
+    } else if(mounted && oldPinController.text.length < 6) {
       setState(() {
         oldPinController.text = oldPinController.text + inputtedNumber.toString();
       });
 
       if(oldPinController.text.length == 6) {
-        await SharedPrefsFunctions.readData('pin').then((pin) {
-          if(pin != null && oldPinController.text == pin) {
-            setState(() {
-              showOldPIN = false;
-              showNewPIN = true;
-            });
-          } else {
-            OkDialog(
-              context: context,
-              content: 'Wrong combination of lock PIN',
-              headIcon: false,
-              okPressed: () => setState(() {
-                oldPinController.text = '';
-              }),
-            ).show();
-          }
-        });
+        String? pin = await LocalSecureStorage.readKey(
+          key: StaticVariables.pinKey,
+        );
+
+        if(mounted && pin != null && oldPinController.text == pin) {
+          setState(() {
+            showOldPIN = false;
+            showNewPIN = true;
+          });
+        } else if(mounted) {
+          LocalDialogFunction.okDialog(
+            context: context,
+            contentText: 'Wrong combination of lock PIN',
+            onClose: () => setState(() {
+              oldPinController.text = '';
+            }),
+          );
+        }
       }
     }
   }
 
-  eraseOldPIN() {
-    if(oldPinController.text.isNotEmpty) {
+  void eraseOldPIN() {
+    if(mounted && oldPinController.text.isNotEmpty) {
       setState(() {
         oldPinController.text = oldPinController.text.substring(0, oldPinController.text.length - 1);
       });
     }
   }
 
-  inputNewPIN(int inputtedNumber) async {
-    if(newPinController.text.isEmpty) {
+  void inputNewPIN(int inputtedNumber) async {
+    if(mounted && newPinController.text.isEmpty) {
       setState(() {
         newPinController.text = inputtedNumber.toString();
       });
-    } else if(newPinController.text.length < 6) {
+    } else if(mounted && newPinController.text.length < 6) {
       setState(() {
         newPinController.text = newPinController.text + inputtedNumber.toString();
       });
 
-      if(newPinController.text.length == 6) {
+      if(mounted && newPinController.text.length == 6) {
         setState(() {
           showNewPIN = false;
           showConfPIN = true;
@@ -141,52 +151,71 @@ class LockSettingPageController extends State<LockSettingPage> {
     }
   }
 
-  eraseNewPIN() {
-    if(newPinController.text.isNotEmpty) {
+  void eraseNewPIN() {
+    if(mounted && newPinController.text.isNotEmpty) {
       setState(() {
         newPinController.text = newPinController.text.substring(0, newPinController.text.length - 1);
       });
     }
   }
 
-  inputConfPIN(int inputtedNumber) async {
-    if(confPinController.text.isEmpty) {
+  void inputConfPIN(int inputtedNumber) async {
+    if(mounted && confPinController.text.isEmpty) {
       setState(() {
         confPinController.text = inputtedNumber.toString();
       });
-    } else if(confPinController.text.length < 6) {
+    } else if(mounted && confPinController.text.length < 6) {
       setState(() {
         confPinController.text = confPinController.text + inputtedNumber.toString();
       });
 
       if(confPinController.text.length == 6) {
         if(confPinController.text == newPinController.text) {
-          await SharedPrefsFunctions.writeData('pin', confPinController.text).then((writeResult) {
-            if(writeResult == true) {
-              OkDialog(
+          bool writeResult = await LocalSecureStorage.writeKey(
+            key: StaticVariables.pinKey,
+            data: confPinController.text,
+          );
+
+          if(mounted && writeResult) {
+            LocalDialogFunction.okDialog(
+              context: context,
+              contentText: "Success change lock PIN",
+              onClose: () => LocalRouteNavigator.closeBack(
                 context: context,
-                content: 'Success change lock PIN',
-                headIcon: true,
-                okPressed: () => CloseBack(context: context, callbackData: true).go(),
-              ).show();
-            }
-          });
-        } else {
-          OkDialog(
+              ),
+            );
+          } else if(mounted) {
+            LocalDialogFunction.okDialog(
+              context: context,
+              contentText: "Failed to change lock PIN, wrong combination of lock PIN",
+              onClose: () {
+                if(mounted) {
+                  setState(() {
+                    confPinController.text = '';
+                  });
+                }
+              }
+            );
+          }
+        } else if(mounted) {
+          LocalDialogFunction.okDialog(
             context: context,
-            content: 'Failed to change lock PIN, wrong combination of lock PIN',
-            headIcon: false,
-            okPressed: () => setState(() {
-              confPinController.text = '';
-            }),
-          ).show();
+            contentText: "Failed to change lock PIN, wrong combination of lock PIN",
+            onClose: () {
+              if(mounted) {
+                setState(() {
+                  confPinController.text = '';
+                });
+              }
+            },
+          );
         }
       }
     }
   }
 
-  eraseConfPIN() {
-    if(confPinController.text.isNotEmpty) {
+  void eraseConfPIN() {
+    if(mounted && confPinController.text.isNotEmpty) {
       setState(() {
         confPinController.text = confPinController.text.substring(0, confPinController.text.length - 1);
       });

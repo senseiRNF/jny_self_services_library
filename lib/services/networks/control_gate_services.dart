@@ -1,156 +1,232 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/services/networks/jsons/gate_logs_json.dart';
-import 'package:jny_self_services_library/services/networks/network_options.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class ControlGateServices {
-  BuildContext context;
-
-  ControlGateServices({
-    required this.context,
-  });
-
-  Future<bool> postAlarmToGate(List<String> epc) async {
+  static Future<bool> postAlarmToGate({
+    required BuildContext context,
+    required List<String> epc,
+  }) async {
     bool result = false;
 
-    await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
-      if(gateURL != null) {
-        await NetworkOption.initNoAPI().then((dio) async {
-          LoadingDialog(context: context).show();
+    CancelToken cancelToken = CancelToken();
 
-          await dio.post(
-            "$gateURL/alarms",
-            data: {
-              "epc": epc,
-            },
-          ).then((postResult) {
-            CloseBack(context: context).go();
+    String? gateURL = await LocalSecureStorage.readKey(
+      key: StaticVariables.gateURLKey,
+    );
 
-            if(postResult.statusCode == 200 || postResult.statusCode == 201) {
-              result = true;
-            }
-          }).catchError((dioExc) {
-            CloseBack(context: context).go();
+    if(!context.mounted) return false;
 
-            if(dioExc.response != null && dioExc.response!.statusCode != 404) {
-              ErrorHandler(context: context, dioExc: dioExc).show();
-            }
-          });
-        });
+    if(gateURL == null) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Gate URL has not been set!",
+      );
+
+      return false;
+    }
+
+    Response? response = await LocalAPIsRequest.submitRequest(
+      requestType: RequestType.post,
+      apisURL: "$gateURL/alarms",
+      headerRequest: {
+        "Accept": "application/json",
+      },
+      bodyData: {
+        "epc": epc,
+      },
+      cancelToken: cancelToken,
+      usingloadingDialog: context,
+    );
+
+    if(response?.statusCode == 200 || response?.statusCode == 201) {
+      result = true;
+    } else {
+      String errMessage = response?.data?['message']
+          ?? "Couldn't retrieve data from server, please try again!";
+
+      if(context.mounted) {
+        LocalDialogFunction.okDialog(
+          context: context,
+          contentText: errMessage,
+        );
       }
-    });
+    }
 
     return result;
   }
 
-  Future<bool> deleteAlarmFromGate(List<String> epc) async {
+  static Future<bool> deleteAlarmFromGate({
+    required BuildContext context,
+    required List<String> epc,
+  }) async {
     bool result = false;
 
-    await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
-      if(gateURL != null) {
-        await NetworkOption.initNoAPI().then((dio) async {
-          LoadingDialog(context: context).show();
+    CancelToken cancelToken = CancelToken();
 
-          await dio.delete(
-            "$gateURL/alarms",
-            data: {
-              "epc": epc,
-            },
-          ).then((deleteResult) {
-            CloseBack(context: context).go();
+    String? gateURL = await LocalSecureStorage.readKey(
+      key: StaticVariables.gateURLKey,
+    );
 
-            if(deleteResult.statusCode == 200 || deleteResult.statusCode == 201) {
-              result = true;
-            }
-          }).catchError((dioExc) {
-            CloseBack(context: context).go();
+    if(!context.mounted) return false;
 
-            if(dioExc.response != null && dioExc.response!.statusCode != 404) {
-              ErrorHandler(context: context, dioExc: dioExc).show();
-            }
-          });
-        });
+    if(gateURL == null) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Gate URL has not been set!",
+      );
+
+      return false;
+    }
+
+    Response? response = await LocalAPIsRequest.submitRequest(
+      requestType: RequestType.delete,
+      apisURL: "$gateURL/alarms",
+      headerRequest: {
+        "Accept": "application/json",
+      },
+      bodyData: {
+        "epc": epc,
+      },
+      cancelToken: cancelToken,
+      usingloadingDialog: context,
+    );
+
+    if(response?.statusCode == 200 || response?.statusCode == 201) {
+      result = true;
+    } else {
+      String errMessage = response?.data?['message']
+          ?? "Couldn't retrieve data from server, please try again!";
+
+      if(context.mounted) {
+        LocalDialogFunction.okDialog(
+          context: context,
+          contentText: errMessage,
+        );
       }
-    });
+    }
 
     return result;
   }
 
-  Future<List<GateLogsData>> getGateLogs(String? startDate, String? endDate, bool isAscending) async {
+  static Future<List<GateLogsData>> getGateLogs({
+    required BuildContext context,
+    String? startDate,
+    String? endDate,
+    required bool isAscending,
+  }) async {
     List<GateLogsData> result = [];
 
-    await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
-      if(gateURL != null) {
-        await NetworkOption.initNoAPI().then((dio) async {
-          LoadingDialog(context: context).show();
+    CancelToken cancelToken = CancelToken();
 
-          await dio.get(
-            "$gateURL/logs",
-            queryParameters: {
-              "start_date": startDate,
-              "end_date": endDate,
-              "order": isAscending == true ? "asc" : "desc",
-            },
-          ).then((getResult) {
-            CloseBack(context: context).go();
+    String? gateURL = await LocalSecureStorage.readKey(
+      key: StaticVariables.gateURLKey,
+    );
 
-            if(getResult.statusCode == 200 || getResult.statusCode == 201) {
-              if(getResult.data != null) {
-                GateLogsJson gateLogsJson = GateLogsJson.fromJson(getResult.data);
+    if(!context.mounted) return [];
 
-                if(gateLogsJson.gateLogsData != null) {
-                  result = gateLogsJson.gateLogsData!;
-                }
-              }
-            }
-          }).catchError((dioExc) {
-            CloseBack(context: context).go();
+    if(gateURL == null) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Gate URL has not been set!",
+      );
 
-            if(dioExc.response != null && dioExc.response!.statusCode != 404) {
-              ErrorHandler(context: context, dioExc: dioExc).show();
-            }
-          });
-        });
+      return [];
+    }
+
+    Response? response = await LocalAPIsRequest.submitRequest(
+      requestType: RequestType.get,
+      apisURL: "$gateURL/logs",
+      headerRequest: {
+        "Accept": "application/json",
+      },
+      parameters: {
+        "start_date": startDate,
+        "end_date": endDate,
+        "order": isAscending == true
+            ? "asc"
+            : "desc",
+      },
+      cancelToken: cancelToken,
+      usingloadingDialog: context,
+    );
+
+    if(response?.statusCode == 200 || response?.statusCode == 201) {
+      if(response?.data is Map<String, dynamic>) {
+        GateLogsJson gateLogsJson = GateLogsJson.fromJson(
+          response?.data ?? {},
+        );
+
+        result = gateLogsJson.gateLogsData ?? [];
       }
-    });
+    } else {
+      String errMessage = response?.data?['message']
+          ?? "Couldn't retrieve data from server, please try again!";
+
+      if(context.mounted) {
+        LocalDialogFunction.okDialog(
+          context: context,
+          contentText: errMessage,
+        );
+      }
+    }
 
     return result;
   }
 
-  Future<bool> checkGateConnections() async {
+  static Future<bool> checkGateConnections({
+    required BuildContext context,
+  }) async {
     bool result = false;
 
-    await SharedPrefsFunctions.readData("gate_url").then((gateURL) async {
-      if(gateURL != null) {
-        await NetworkOption.initNoAPI().then((dio) async {
-          LoadingDialog(context: context).show();
+    CancelToken cancelToken = CancelToken();
 
-          await dio.get(
-            "$gateURL/logs",
-            queryParameters: {
-              "start_date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
-              "end_date": DateFormat("yyyy-MM-dd").format(DateTime.now()),
-              "order": "asc",
-            },
-          ).then((getResult) {
-            CloseBack(context: context).go();
+    String? gateURL = await LocalSecureStorage.readKey(
+      key: StaticVariables.gateURLKey,
+    );
 
-            if(getResult.statusCode == 200 || getResult.statusCode == 201) {
-              result = true;
-            }
-          }).catchError((dioExc) {
-            CloseBack(context: context).go();
+    if(!context.mounted) return false;
 
-            if(dioExc.response != null && dioExc.response!.statusCode != 404) {
-              ErrorHandler(context: context, dioExc: dioExc).show();
-            }
-          });
-        });
-      }
-    });
+    if(gateURL == null) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Gate URL has not been set!",
+      );
+
+      return false;
+    }
+
+    Response? response = await LocalAPIsRequest.submitRequest(
+      requestType: RequestType.get,
+      apisURL: "$gateURL/logs",
+      headerRequest: {
+        "Accept": "application/json",
+      },
+      parameters: {
+        "start_date": DateFormat("yyyy-MM-dd").format(
+          DateTime.now(),
+        ),
+        "end_date": DateFormat("yyyy-MM-dd").format(
+          DateTime.now(),
+        ),
+        "order": "asc",
+      },
+      cancelToken: cancelToken,
+      usingloadingDialog: context,
+    );
+
+    if((response?.statusCode ?? 999) < 500) {
+      result = true;
+    } else if(context.mounted) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: response == null
+            ? "Couldn't retrieve data from server, please try again!"
+            : "Server is having trouble (Error ${response.statusCode})",
+      );
+    }
 
     return result;
   }

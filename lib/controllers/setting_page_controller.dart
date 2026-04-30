@@ -7,10 +7,9 @@ import 'package:jny_self_services_library/controllers/monitor_setup_page_control
 import 'package:jny_self_services_library/controllers/splash_page_controller.dart';
 import 'package:jny_self_services_library/controllers/health_check_page_controller.dart';
 import 'package:jny_self_services_library/services/locals/bridging_channel/method_channel_native.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/view_pages/setting_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -20,32 +19,39 @@ class SettingPage extends StatefulWidget {
 }
 
 class SettingPageController extends State<SettingPage> {
+  
+  @override
+  void initState() {
+    super.initState();
+  }
 
-  openBluetoothSettings() => MoveTo(
+  void openBluetoothSettings() => LocalRouteNavigator.moveTo(
     context: context,
     target: const BluetoothSettingPage(),
-  ).go();
+  );
 
-  openCheckBookStatusSettings() => MoveTo(
+  void openCheckBookStatusSettings() => LocalRouteNavigator.moveTo(
     context: context,
     target: const CheckBookStatusSettingPage(),
-  ).go();
+  );
 
-  changeLockPIN() => MoveTo(
+  void changeLockPIN() => LocalRouteNavigator.moveTo(
     context: context,
     target: const LockSettingPage(
       updatePIN: true,
     ),
-  ).go();
+  );
 
-  changePowerLevelReader() async => await SharedPrefsFunctions.readData('powerLevel').then((currentPower) {
-    double powerLevel = 0.0;
+  void changePowerLevelReader() async {
+    String? currentPowerLevel = await LocalSecureStorage.readKey(
+      key: StaticVariables.powerLevelKey,
+    );
 
-    if(currentPower != null) {
-      powerLevel = double.parse(currentPower);
-    }
+    double powerLevel = double.parse(currentPowerLevel ?? "0.0");
 
-    showDialog(
+    if(!mounted) return;
+
+    int? dialogResult = await showDialog<int?>(
       context: context,
       builder: (BuildContext dialogContext) {
         return StatefulBuilder(
@@ -82,7 +88,10 @@ class SettingPageController extends State<SettingPage> {
                     height: 10.0,
                   ),
                   ElevatedButton(
-                    onPressed: () => CloseBack(context: context, callbackData: powerLevel.toInt()).go(),
+                    onPressed: () => LocalRouteNavigator.closeBack(
+                      context: context,
+                      callbackResult: powerLevel.toInt(),
+                    ),
                     child: const Padding(
                       padding: EdgeInsets.all(10.0),
                       child: Text(
@@ -96,50 +105,58 @@ class SettingPageController extends State<SettingPage> {
           },
         );
       },
-    ).then((dialogResult) async {
-      if(dialogResult != null) {
-        await MethodChannelNative(context: context).setPowerLevel(dialogResult).then((setResult) async {
-          if(setResult == true) {
-            await SharedPrefsFunctions.writeData('powerLevel', dialogResult.toString());
-          }
-        });
-      }
-    });
-  });
+    );
 
-  setupMonitorPairingID() => MoveTo(
+    if(!mounted) return;
+
+    if(dialogResult != null) {
+      bool setResult = await MethodChannelNative(context: context)
+          .setPowerLevel(dialogResult);
+
+      if(setResult == true) {
+        await LocalSecureStorage.writeKey(
+          key: StaticVariables.powerLevelKey,
+          data: dialogResult.toString(),
+        );
+      }
+    }
+  }
+
+  void setupMonitorPairingID() => LocalRouteNavigator.moveTo(
     context: context,
     target: const MonitorSetupPage(),
-  ).go();
+  );
 
-  setupServerGateURL() => MoveTo(
+  void setupServerGateURL() => LocalRouteNavigator.moveTo(
     context: context,
     target: const AlarmGateSetupPage(),
-  ).go();
+  );
 
-  openHealthCheck() => MoveTo(
+  void openHealthCheck() => LocalRouteNavigator.moveTo(
     context: context,
     target: const HealthCheckPage(),
-  ).go();
+  );
 
-  signOut() => OptionDialog(
+  void signOut() => LocalDialogFunction.optionDialog(
     context: context,
-    content: 'Sign out from this account, are you sure?',
-    yesPressed: () async {
-      await SharedPrefsFunctions.removeData('bluetooth').then((removeBTResult) async {
-        if(removeBTResult == true) {
-          await SharedPrefsFunctions.removeData('account').then((removeAccResult) {
-            if(removeAccResult == true) {
-              RedirectTo(
-                context: context,
-                target: const SplashPage(),
-              ).go();
-            }
-          });
-        }
-      });
+    contentText: 'Sign out from this account, are you sure?',
+    onAccept: () async {
+      bool removeBTResult = await LocalSecureStorage.deleteKey(
+        key: StaticVariables.bluetoothKey,
+      );
+
+      bool removeAccountResult = await LocalSecureStorage.deleteKey(
+        key: StaticVariables.accountKey,
+      );
+
+      if(mounted && removeBTResult == true && removeAccountResult == true) {
+        LocalRouteNavigator.redirectTo(
+          context: context,
+          target: const SplashPage(),
+        );
+      }
     },
-  ).show();
+  );
 
   @override
   Widget build(BuildContext context) {

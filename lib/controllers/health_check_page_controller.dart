@@ -4,11 +4,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:jny_self_services_library/services/locals/functions/permission_checker.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/view_pages/health_check_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HealthCheckPage extends StatefulWidget {
@@ -29,97 +30,117 @@ class HealthCheckPageController extends State<HealthCheckPage> {
 
   String currentTroubleshootState = "No Activity";
 
-  troubleshooting() async {
-    await checkBluetoothConnection().then((_) async =>
-        await checkGateConnection().then((_) async =>
-            await checkMonitorConnection().then((_) =>
-                setState(() {
-                  isHealthCheckRun = true;
-                  currentTroubleshootState = "Completed";
-                })
-            )
-        )
-    );
+  void troubleshooting() async {
+    try {
+      await checkBluetoothConnection();
+      await checkGateConnection();
+      await checkMonitorConnection();
+
+      if(mounted) {
+        setState(() {
+          isHealthCheckRun = true;
+          currentTroubleshootState = "Completed";
+        });
+      }
+    } catch(e) {
+      debugPrint("err: $e");
+    }
   }
 
   Future checkBluetoothConnection() async {
-    setState(() {
-      currentTroubleshootState = "Checking Bluetooth Activity";
-    });
+    if(mounted) {
+      setState(() {
+        currentTroubleshootState = "Checking Bluetooth Activity";
+      });
+    }
 
-    await PermissionChecker.checkBluetoothConnectPermission().then((connectPermission) async {
-      if(connectPermission.isGranted || connectPermission.isLimited) {
-        await PermissionChecker.checkBluetoohScanPermission().then((scanPermission) async {
-          if(scanPermission.isGranted || scanPermission.isLimited) {
-            await FlutterBluePlus.isSupported.then((isSupported) {
-              if(isSupported) {
-                adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) async {
-                  if(state == BluetoothAdapterState.on) {
-                    await SharedPrefsFunctions.readData('bluetooth').then((bt) {
-                      if(bt != null) {
-                        LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(jsonDecode(bt));
+    PermissionStatus btConnectPermission = await PermissionChecker.checkBluetoothConnectPermission();
 
-                        if(btJson.bluetoothRemoteId != null) {
-                          setState(() {
-                            isBluetoothConnect = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!)).isConnected;
-                          });
-                        } else {
-                          setState(() {
-                            isBluetoothConnect = false;
-                          });
-                        }
-                      } else {
-                        setState(() {
-                          isBluetoothConnect = false;
-                        });
-                      }
-                    });
-                  } else {
-                    setState(() {
-                      isBluetoothConnect = false;
-                    });
-                  }
-                });
-              } else {
+    if(btConnectPermission.isGranted || btConnectPermission.isLimited) {
+      PermissionStatus btScanPermission = await PermissionChecker.checkBluetoohScanPermission();
+
+      if(btScanPermission.isGranted || btScanPermission.isLimited) {
+        bool isSupported = await FlutterBluePlus.isSupported;
+
+        if(isSupported) {
+          adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) async {
+            if(state == BluetoothAdapterState.on) {
+              String? bluetooth = await LocalSecureStorage.readKey(
+                key: StaticVariables.bluetoothKey,
+              );
+
+              if(bluetooth != null) {
+                LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(
+                  jsonDecode(bluetooth),
+                );
+
+                if(mounted && btJson.bluetoothRemoteId != null) {
+                  setState(() {
+                    isBluetoothConnect = BluetoothDevice(
+                      remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!),
+                    ).isConnected;
+                  });
+                } else if(mounted) {
+                  setState(() {
+                    isBluetoothConnect = false;
+                  });
+                }
+              } else if(mounted) {
                 setState(() {
                   isBluetoothConnect = false;
                 });
               }
-            });
-          } else {
-            setState(() {
-              isBluetoothConnect = false;
-            });
-          }
-        });
-      } else {
-        setState(() {
-          isBluetoothConnect = false;
-        });
+            } else {
+              setState(() {
+                isBluetoothConnect = false;
+              });
+            }
+          });
+        } else if(mounted) {
+          setState(() {
+            isBluetoothConnect = false;
+          });
+        }
       }
-    });
+    } else if(mounted) {
+      setState(() {
+        isBluetoothConnect = false;
+      });
+    }
   }
 
   Future checkGateConnection() async {
-    setState(() {
-      currentTroubleshootState = "Checking Gate Activity";
-    });
+    if(mounted) {
+      setState(() {
+        currentTroubleshootState = "Checking Gate Activity";
+      });
+    }
 
-    await ControlGateServices(context: context).checkGateConnections().then((connection) => setState(() {
-      isGateServerConnected = connection;
-    }));
+    bool connection = await ControlGateServices.checkGateConnections(
+      context: context,
+    );
+
+    if(mounted) {
+      setState(() {
+        isGateServerConnected = connection;
+      });
+    }
   }
 
   Future checkMonitorConnection() async {
-    setState(() {
-      currentTroubleshootState = "Checking Monitor Activity";
-    });
+    if(mounted) {
+      setState(() {
+        currentTroubleshootState = "Checking Monitor Activity";
+      });
+    }
 
-    await DisplayMonitorServices.checkMonitorConnections().then((connection) {
+    bool connection = await DisplayMonitorServices.checkMonitorConnections();
+
+    if(mounted) {
       setState(() {
         isMonitorConnected = connection;
       });
-    });
+    }
   }
 
   @override

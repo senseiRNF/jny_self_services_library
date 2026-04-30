@@ -6,9 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/controllers/thanks_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
 import 'package:jny_self_services_library/services/networks/control_gate_services.dart';
@@ -16,6 +14,7 @@ import 'package:jny_self_services_library/services/networks/display_monitor_serv
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/view_pages/return_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class ReturnPage extends StatefulWidget {
   final LibraryMemberData libraryMemberData;
@@ -53,15 +52,19 @@ class ReturnPageController extends State<ReturnPage> {
   }
 
   Future checkConnection() async {
-    await SharedPrefsFunctions.readData('bluetooth').then((bt) {
-      if(bt != null) {
-        LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(jsonDecode(bt));
+    String? encodedBluetooth = await LocalSecureStorage.readKey(
+      key: StaticVariables.bluetoothKey,
+    );
 
-        if(btJson.bluetoothRemoteId != null) {
-          connectedDevice = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!));
-        }
-      }
-    });
+    LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(
+      encodedBluetooth != null
+          ? jsonDecode(encodedBluetooth)
+          : {},
+    );
+
+    if(btJson.bluetoothRemoteId != null) {
+      connectedDevice = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!));
+    }
   }
 
   Future checkBorrowedBook() async {
@@ -74,88 +77,97 @@ class ReturnPageController extends State<ReturnPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId, "on loan").then((result) {
-      List<BorrowedDetailDataJson> tempList = [];
-      List<Map> tempConvertedList = [];
+    BorrowedDetailJson? borrowedDetailJson = await BookServices.checkCurrentBorrow(
+      context: context,
+      studentId: studentId,
+      employeeId: employeeId,
+      status: "on loan",
+    );
 
-      if(result != null && result.borrowedDetailDataJson != null) {
-        for(int i = 0; i < result.borrowedDetailDataJson!.length; i++) {
-          tempList.add(result.borrowedDetailDataJson![i]);
-          tempConvertedList.add(result.borrowedDetailDataJson![i].toJson());
-        }
+    List<BorrowedDetailDataJson> tempList = [];
+    List<Map> tempConvertedList = [];
+
+    if(borrowedDetailJson?.borrowedDetailDataJson != null) {
+      for(BorrowedDetailDataJson data in borrowedDetailJson?.borrowedDetailDataJson ?? []) {
+        tempList.add(data);
+        tempConvertedList.add(data.toJson());
       }
+    }
 
-      setState(() {
-        listBorrowedDetail = tempList;
-      });
-
-      DisplayMonitorServices.sendStateToMonitor(
-        "SHOW_RETURN",
-        {
-          "library_member": widget.libraryMemberData.toJson(),
-          "book_list": tempConvertedList,
-        },
-      );
-    });
-  }
-
-  changeOnListenStatus() {
     setState(() {
-      isOnListen = !isOnListen;
+      listBorrowedDetail = tempList;
     });
+
+    DisplayMonitorServices.sendStateToMonitor(
+      "SHOW_RETURN",
+      {
+        "library_member": widget.libraryMemberData.toJson(),
+        "book_list": tempConvertedList,
+      },
+    );
   }
 
-  startRFIDAuto() async {
+  void changeOnListenStatus() {
+    if(mounted) {
+      setState(() {
+        isOnListen = !isOnListen;
+      });
+    }
+  }
+
+  void startRFIDAuto() async {
     changeOnListenStatus();
 
-    setState(() {
-      eventChannelStreamSubscription = const EventChannel('intidata.android/library_app_event').receiveBroadcastStream().listen((data) async {
-        if(!scannedRFID.contains(data.toString().substring(0, 16))) {
-          setState(() {
-            scannedRFID.add(data.toString().substring(0, 16));
-          });
+    if(mounted) {
+      setState(() {
+        eventChannelStreamSubscription = const EventChannel('intidata.android/library_app_event').receiveBroadcastStream().listen((data) async {
+          if(!scannedRFID.contains(data.toString().substring(0, 16))) {
+            setState(() {
+              scannedRFID.add(data.toString().substring(0, 16));
+            });
 
-          if(listBorrowedBooks.isNotEmpty) {
-            List<Map> tempConvertedList = [];
+            if(listBorrowedBooks.isNotEmpty) {
+              List<Map> tempConvertedList = [];
 
-            for(int i = 0; i < listBorrowedBooks.length; i++) {
-              BorrowedBooksDataJson tempData = listBorrowedBooks[i].values.first;
+              for(int i = 0; i < listBorrowedBooks.length; i++) {
+                BorrowedBooksDataJson tempData = listBorrowedBooks[i].values.first;
 
-              if(data.toString().substring(0, 16) == "${listBorrowedBooks[i].values.first.rfidTag!.substring(0, 14)}00") {
-                tempConvertedList.add({
-                  "scanned": true,
-                  "book_data": tempData.toJson(),
-                });
+                if(data.toString().substring(0, 16) == "${listBorrowedBooks[i].values.first.rfidTag!.substring(0, 14)}00") {
+                  tempConvertedList.add({
+                    "scanned": true,
+                    "book_data": tempData.toJson(),
+                  });
 
-                setState(() {
-                  listBorrowedBooks[i] = {true: tempData};
-                  isAbleToProceed = true;
-                });
-              } else {
-                tempConvertedList.add({
-                  "scanned": listBorrowedBooks[i].keys.first,
-                  "book_data": tempData.toJson(),
-                });
+                  setState(() {
+                    listBorrowedBooks[i] = {true: tempData};
+                    isAbleToProceed = true;
+                  });
+                } else {
+                  tempConvertedList.add({
+                    "scanned": listBorrowedBooks[i].keys.first,
+                    "book_data": tempData.toJson(),
+                  });
+                }
+              }
+
+              if(tempConvertedList.isNotEmpty) {
+                DisplayMonitorServices.sendStateToMonitor(
+                  "SHOW_RETURN_LIST",
+                  {
+                    "library_member": widget.libraryMemberData.toJson(),
+                    "book_list": tempConvertedList,
+                  },
+                );
               }
             }
-
-            if(tempConvertedList.isNotEmpty) {
-              DisplayMonitorServices.sendStateToMonitor(
-                "SHOW_RETURN_LIST",
-                {
-                  "library_member": widget.libraryMemberData.toJson(),
-                  "book_list": tempConvertedList,
-                },
-              );
-            }
           }
-        }
+        });
       });
-    });
+    }
   }
 
   Future cancelRFIDAuto() async {
-    if(eventChannelStreamSubscription != null && isOnListen == true) {
+    if(mounted && eventChannelStreamSubscription != null && isOnListen == true) {
       setState(() {
         isOnListen = false;
         eventChannelStreamSubscription!.cancel();
@@ -163,16 +175,16 @@ class ReturnPageController extends State<ReturnPage> {
     }
   }
 
-  showBorrowedBooks(BorrowedDetailDataJson borrowedDetail) {
+  void showBorrowedBooks(BorrowedDetailDataJson borrowedDetail) async {
     List<Map<bool, BorrowedBooksDataJson>> tempList = [];
     List<Map> tempConvertedList = [];
 
     if(borrowedDetail.books != null) {
-      for(int i = 0; i < borrowedDetail.books!.length; i++) {
-        tempList.add({false: borrowedDetail.books![i]});
+      for(BorrowedBooksDataJson data in borrowedDetail.books ?? []) {
+        tempList.add({false: data});
         tempConvertedList.add({
           "scanned": false,
-          "book_data": borrowedDetail.books![i].toJson(),
+          "book_data": data.toJson(),
         });
       }
     }
@@ -182,34 +194,33 @@ class ReturnPageController extends State<ReturnPage> {
       selectedBorrowedDetail = borrowedDetail;
     });
 
-    checkConnection().then((_) {
-      if(connectedDevice != null) {
-        if(isOnListen == false) {
-          DisplayMonitorServices.sendStateToMonitor(
-            "SHOW_RETURN_LIST",
-            {
-              "library_member": widget.libraryMemberData.toJson(),
-              "book_list": tempConvertedList,
-            },
-          );
+    await checkConnection();
 
-          startRFIDAuto();
+    if(connectedDevice != null) {
+      if(isOnListen == false) {
+        DisplayMonitorServices.sendStateToMonitor(
+          "SHOW_RETURN_LIST",
+          {
+            "library_member": widget.libraryMemberData.toJson(),
+            "book_list": tempConvertedList,
+          },
+        );
 
-          popInstruction();
-        }
-      } else {
-        OkDialog(
-          context: context,
-          content: 'Bluetooth not connected!',
-          headIcon: false,
-          okPressed: () => closeBorrowedBooks(),
-        ).show();
+        startRFIDAuto();
+
+        popInstruction();
       }
-    });
+    } else if(mounted) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: 'Bluetooth not connected!',
+        onClose: () => closeBorrowedBooks(),
+      );
+    }
   }
 
-  returnBook(int borrowId) async {
-    LoadingDialog(context: context).show();
+  void returnBook(int borrowId) async {
+    LocalDialogFunction.loadingDialog(context: context);
 
     if(isOnListen) {
       cancelRFIDAuto();
@@ -256,8 +267,10 @@ class ReturnPageController extends State<ReturnPage> {
         }
       });
 
-      Future.delayed(const Duration(seconds: 3), () async {
-        CloseBack(context: context).go();
+      Future.delayed(const Duration(seconds: 2), () async {
+        if(mounted) {
+          LocalRouteNavigator.closeBack(context: context);
+        }
 
         tempEventChannelStreamSubscription.cancel();
 
@@ -280,61 +293,79 @@ class ReturnPageController extends State<ReturnPage> {
             }
           }
 
-          await ControlGateServices(context: context).deleteAlarmFromGate(epcList).then((deleteAlarmResult) async {
-            if(deleteAlarmResult == true) {
-              await BookServices(context: context).returnBook(borrowId, returnDate, itemList, studentId, employeeId).then((result) async {
-                if(result == true) {
-                  setState(() {
-                    listBorrowedBooks.clear();
-                    scannedRFID.clear();
-                  });
+          if(mounted) {
+            bool deleteAlarm = await ControlGateServices.deleteAlarmFromGate(
+              context: context, epc: epcList,
+            );
 
-                  MoveTo(
+            if(mounted && deleteAlarm == true) {
+              bool returnBook = await BookServices.returnBook(
+                context: context,
+                borrowId: borrowId,
+                returnDate: returnDate,
+                itemList: itemList,
+                studentId: studentId,
+                employeeId: employeeId,
+              );
+
+              if(mounted && returnBook) {
+                setState(() {
+                  listBorrowedBooks.clear();
+                  scannedRFID.clear();
+                });
+
+                LocalRouteNavigator.moveTo(
+                  context: context,
+                  target: const ThanksPage(
+                    type: 1,
+                  ),
+                  callbackFunction: (_) => LocalRouteNavigator.closeBack(
                     context: context,
-                    target: const ThanksPage(
-                      type: 1,
-                    ),
-                    callback: (_) => CloseBack(context: context).go(),
-                  ).go();
-                } else {
-                  await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
+                  ),
+                );
+              } else if(mounted) {
+                ControlGateServices.postAlarmToGate(
+                  context: context,
+                  epc: epcList,
+                ).then((_) {
+                  closeBorrowedBooks();
+                });
+              }
+            } else if(mounted) {
+              LocalDialogFunction.okDialog(
+                context: context,
+                contentText: 'Failed to communicating with gate system, please try again!',
+                onClose: () async {
+                  ControlGateServices.postAlarmToGate(
+                    context: context,
+                    epc: epcList,
+                  ).then((_) {
                     closeBorrowedBooks();
                   });
-                }
-              });
-            } else {
-              OkDialog(
-                context: context,
-                content: 'Failed to communicating with gate system, please try again!',
-                headIcon: false,
-                okPressed: () async => await ControlGateServices(context: context).postAlarmToGate(epcList).then((_) async  {
-                  closeBorrowedBooks();
-                }),
-              ).show();
+                },
+              );
             }
-          });
-        } else {
-          OkDialog(
+          }
+        } else if(mounted) {
+          LocalDialogFunction.okDialog(
             context: context,
-            content: 'Failed to Return!\n\nPlease do not remove books from Scanner before process is completed',
-            headIcon: false,
-            okPressed: () => closeBorrowedBooks(),
-          ).show();
+            contentText: 'Failed to Return!\n\nPlease do not remove books from Scanner before process is completed',
+            onClose: () => closeBorrowedBooks(),
+          );
         }
       });
-    } else {
-      CloseBack(context: context).go();
+    } else if(mounted) {
+      LocalRouteNavigator.closeBack(context: context);
 
-      OkDialog(
+      LocalDialogFunction.okDialog(
         context: context,
-        content: 'Failed to Return!\n\nPlease put the books in the Scanner',
-        headIcon: false,
-        okPressed: () => closeBorrowedBooks(),
-      ).show();
+        contentText: 'Failed to Return!\n\nPlease put the books in the Scanner',
+        onClose: () => closeBorrowedBooks(),
+      );
     }
   }
 
-  closeBorrowedBooks() {
+  void closeBorrowedBooks() {
     setState(() {
       listBorrowedBooks.clear();
       scannedRFID.clear();
@@ -351,12 +382,14 @@ class ReturnPageController extends State<ReturnPage> {
     checkBorrowedBook();
   }
 
-  clearScannedRFIDList() {
-    setState(() {
-      listBorrowedBooks.clear();
-      scannedRFID.clear();
-      isAbleToProceed = false;
-    });
+  void clearScannedRFIDList() {
+    if(mounted) {
+      setState(() {
+        listBorrowedBooks.clear();
+        scannedRFID.clear();
+        isAbleToProceed = false;
+      });
+    }
 
     List<Map<bool, BorrowedBooksDataJson>> tempList = [];
     List<Map> tempConvertedList = [];
@@ -371,9 +404,11 @@ class ReturnPageController extends State<ReturnPage> {
       }
     }
 
-    setState(() {
-      listBorrowedBooks = tempList;
-    });
+    if(mounted) {
+      setState(() {
+        listBorrowedBooks = tempList;
+      });
+    }
 
     DisplayMonitorServices.sendStateToMonitor(
       "SHOW_RETURN_LIST",
@@ -390,7 +425,7 @@ class ReturnPageController extends State<ReturnPage> {
     }
   }
 
-  popInstruction() {
+  void popInstruction() {
     showDialog(
       context: context,
       builder: (dialogBuilder) {
@@ -418,7 +453,9 @@ class ReturnPageController extends State<ReturnPage> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () => CloseBack(context: context).go(),
+                onPressed: () => LocalRouteNavigator.closeBack(
+                  context: context,
+                ),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 10.0),
                   child: Text(

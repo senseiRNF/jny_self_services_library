@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/view_pages/thanks_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class ThanksPage extends StatefulWidget {
   final int type;
@@ -38,51 +38,53 @@ class ThanksPageController extends State<ThanksPage> {
   void initState() {
     super.initState();
 
-    setState(() {
-      timer = Timer.periodic(const Duration(seconds: 1), (ticker) {
-        setState(() {
-          countdownTime = countdownTime - 1;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        timer = Timer.periodic(const Duration(seconds: 1), (ticker) {
+          setState(() {
+            countdownTime = countdownTime - 1;
+          });
+
+          if(ticker.tick == 5) {
+            timer.cancel();
+
+            LocalRouteNavigator.closeBack(context: context);
+          }
         });
-
-        if(ticker.tick == 5) {
-          timer.cancel();
-
-          CloseBack(context: context).go();
-        }
       });
-    });
 
-    switch(widget.type) {
-      case 0:
-        DisplayMonitorServices.sendStateToMonitor(
-          "BORROW",
-          {
-            "library_member": {},
-            "book_list": {},
-          },
-        );
-        break;
-      case 1:
-        DisplayMonitorServices.sendStateToMonitor(
-          "RETURN",
-          {
-            "library_member": {},
-            "book_list": {},
-          },
-        );
-        break;
-      case 2:
-        DisplayMonitorServices.sendStateToMonitor(
-          "RENEW",
-          {
-            "library_member": {},
-            "book_list": {},
-          },
-        );
-        break;
-      default:
-        break;
-    }
+      switch(widget.type) {
+        case 0:
+          DisplayMonitorServices.sendStateToMonitor(
+            "BORROW",
+            {
+              "library_member": {},
+              "book_list": {},
+            },
+          );
+          break;
+        case 1:
+          DisplayMonitorServices.sendStateToMonitor(
+            "RETURN",
+            {
+              "library_member": {},
+              "book_list": {},
+            },
+          );
+          break;
+        case 2:
+          DisplayMonitorServices.sendStateToMonitor(
+            "RENEW",
+            {
+              "library_member": {},
+              "book_list": {},
+            },
+          );
+          break;
+        default:
+          break;
+      }
+    });
   }
 
   @override

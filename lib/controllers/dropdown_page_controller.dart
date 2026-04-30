@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/jsons/language_list_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/subjects_list_json.dart';
 import 'package:jny_self_services_library/view_pages/dropdown_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class DropdownPage extends StatefulWidget {
   final String title;
@@ -22,7 +22,10 @@ class DropdownPage extends StatefulWidget {
 
 class DropdownPageController extends State<DropdownPage> {
 
-  pickSelected(dynamic result) => CloseBack(context: context, callbackData: result).go();
+  void pickSelected(dynamic result) => LocalRouteNavigator.closeBack(
+    context: context,
+    callbackResult: result,
+  );
 
   @override
   Widget build(BuildContext context) {

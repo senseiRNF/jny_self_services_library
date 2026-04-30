@@ -3,14 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:jny_self_services_library/services/locals/bridging_channel/method_channel_native.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/services/locals/local_jsons/local_bluetooth_json.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_history_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/view_pages/check_book_status_setting_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class CheckBookStatusSettingPage extends StatefulWidget {
   const CheckBookStatusSettingPage({super.key});
@@ -33,67 +32,90 @@ class CheckBookStatusSettingPageController extends State<CheckBookStatusSettingP
   void initState() {
     super.initState();
 
-    checkConnection().then((_) {
-      if(connectedDevice == null) {
-        OkDialog(
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await checkConnection();
+
+      if(mounted && connectedDevice == null) {
+        LocalDialogFunction.okDialog(
           context: context,
-          content: 'Bluetooth not connected!',
-          headIcon: false,
-          okPressed: () => CloseBack(context: context).go(),
-        ).show();
+          contentText: "Bluetooth not connected!",
+          onClose: () => LocalRouteNavigator.closeBack(
+            context: context,
+          ),
+        );
       }
     });
   }
 
   Future checkConnection() async {
-    await SharedPrefsFunctions.readData('bluetooth').then((bt) {
-      if(bt != null) {
-        LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(jsonDecode(bt));
+    String? bluetooh = await LocalSecureStorage.readKey(
+      key: StaticVariables.bluetoothKey,
+    );
 
-        if(btJson.bluetoothRemoteId != null) {
-          connectedDevice = BluetoothDevice(remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!));
-        }
+    if(bluetooh != null) {
+      LocalBluetoothJson btJson = LocalBluetoothJson.fromJson(
+        jsonDecode(bluetooh),
+      );
+
+      if(btJson.bluetoothRemoteId != null) {
+        connectedDevice = BluetoothDevice(
+          remoteId: DeviceIdentifier(btJson.bluetoothRemoteId!),
+        );
       }
-    });
+    }
   }
 
-  checkRFIDTagAlarm() async {
+  void checkRFIDTagAlarm() async {
     MethodChannelNative(context: context).readRFID().then((rfid) async {
-      if(rfid != null) {
+      if(mounted && rfid != null) {
         setState(() {
           scannedRFID = rfid.substring(0, 16);
           isLoadingData = true;
         });
 
-        await BookServices(context: context).showBookByRFID(rfid.substring(0, 16)).then((bookResult) async {
-          if(bookResult != null) {
+        try {
+          BookDataJson? bookResult = await BookServices.showBookByRFID(
+            context: context,
+            rfid: rfid.substring(0, 16),
+          );
+
+          if(mounted && bookResult != null) {
             setState(() {
               bookDataJson = bookResult;
             });
 
-            await BookServices(context: context).showBookHistory(rfid.substring(0, 16)).then((historyResult) {
-              if(historyResult != null && historyResult.loanHistories != null) {
+            try {
+              BookHistoryDataJson? historyResult = await BookServices.showBookHistory(
+                context: context,
+                rfid: rfid.substring(0, 16),
+              );
+
+              if(mounted && historyResult != null && historyResult.loanHistories != null) {
                 setState(() {
                   loanHistoryList = historyResult.loanHistories!;
                   isLoadingData = false;
                 });
               }
-            }).catchError((err) {
-              setState(() {
-                isLoadingData = false;
-              });
-            });
+            } catch(e) {
+              if(mounted) {
+                setState(() {
+                  isLoadingData = false;
+                });
+              }
+            }
           } else {
             setState(() {
               bookDataJson = null;
             });
           }
-        }).catchError((err) {
-          setState(() {
-            isLoadingData = false;
-          });
-        });
-      } else {
+        } catch(e) {
+          if(mounted) {
+            setState(() {
+              isLoadingData = false;
+            });
+          }
+        }
+      } else if(mounted) {
         setState(() {
           scannedRFID = null;
           bookDataJson = null;

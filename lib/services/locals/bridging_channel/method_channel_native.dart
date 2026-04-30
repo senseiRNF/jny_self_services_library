@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class MethodChannelNative {
   BuildContext context;
@@ -9,50 +9,49 @@ class MethodChannelNative {
 
   static const platform = MethodChannel('intidata.android/library_app');
 
-  Future initMethod() async {
-    await platform.invokeMethod('init').catchError((e) {
-      OkDialog(
+  Future initMethod() async => await platform.invokeMethod(
+    'init',
+  ).catchError((e) {
+    if(context.mounted) {
+      LocalDialogFunction.okDialog(
         context: context,
-        content: 'Failed to init Method Channel\n\n${e.message}',
-        headIcon: false,
-      ).show();
-    });
-  }
+        contentText: 'Failed to init Method Channel\n\n${e.message}',
+      );
+    }
+  });
 
-  Future setDeviceToNative(String address) async {
-    await platform.invokeMethod<bool>(
-      'setConnectedBluetooth',
-      {
-        "address": address,
-      },
-    ).then((setResult) async {
-      if(setResult != null) {
-        await readRFID();
-      }
-    }).catchError((e) {
-      OkDialog(
+  Future setDeviceToNative(String address) async => await platform.invokeMethod<bool>(
+    'setConnectedBluetooth',
+    {
+      "address": address,
+    },
+  ).then((setResult) async {
+    if(setResult != null) {
+      await readRFID();
+    }
+  }).catchError((e) {
+    if(context.mounted) {
+      LocalDialogFunction.okDialog(
         context: context,
-        content: 'Failed to set device\n\n${e.message}',
-        headIcon: false,
-      ).show();
-    });
-  }
+        contentText: 'Failed to set device\n\n${e.message}',
+      );
+    }
+  });
 
-  Future removeDeviceFromNative() async {
-    await platform.invokeMethod<bool>(
-      'removeConnectedBluetooth',
-    ).then((setResult) async {
-      if(setResult != null) {
-        await readRFID();
-      }
-    }).catchError((e) {
-      OkDialog(
+  Future removeDeviceFromNative() async => await platform.invokeMethod<bool>(
+    'removeConnectedBluetooth',
+  ).then((setResult) async {
+    if(setResult != null) {
+      await readRFID();
+    }
+  }).catchError((e) {
+    if(context.mounted) {
+      LocalDialogFunction.okDialog(
         context: context,
-        content: 'Failed to remove device\n\n${e.message}',
-        headIcon: false,
-      ).show();
-    });
-  }
+        contentText: 'Failed to remove device\n\n${e.message}',
+      );
+    }
+  });
 
   Future<String?> readRFID() async {
     String? result;
@@ -60,11 +59,12 @@ class MethodChannelNative {
     await platform.invokeMethod<String>('readRFID').then((rfid) {
       result = rfid;
     }).catchError((e) {
-      OkDialog(
-        context: context,
-        content: 'Failed to scan RFID\n\n${e.message}',
-        headIcon: false,
-      ).show();
+      if(context.mounted) {
+        LocalDialogFunction.okDialog(
+          context: context,
+          contentText: 'Failed to scan RFID\n\n${e.message}',
+        );
+      }
     });
 
     return result;
@@ -83,11 +83,12 @@ class MethodChannelNative {
         result = writeResult;
       }
     }).catchError((e) {
-      OkDialog(
-        context: context,
-        content: 'Failed to write RFID\n\n${e.message}',
-        headIcon: false,
-      ).show();
+      if(context.mounted) {
+        LocalDialogFunction.okDialog(
+          context: context,
+          contentText: 'Failed to write RFID\n\n${e.message}',
+        );
+      }
     });
 
     return result;
@@ -106,33 +107,36 @@ class MethodChannelNative {
         result = writeResult;
       }
     }).catchError((e) {
-      OkDialog(
-        context: context,
-        content: 'Failed to set Power Level\n\n${e.message}',
-        headIcon: false,
-      ).show();
+      if(context.mounted) {
+        LocalDialogFunction.okDialog(
+          context: context,
+          contentText: 'Failed to set Power Level\n\n${e.message}',
+        );
+      }
     });
 
     return result;
   }
 
-  Future startThreadRFID() async {
-    await platform.invokeMethod('startThread').catchError((e) {
-      OkDialog(
+  Future startThreadRFID() async => await platform.invokeMethod(
+    'startThread',
+  ).catchError((e) {
+    if(context.mounted) {
+      LocalDialogFunction.okDialog(
         context: context,
-        content: 'Failed to scan RFID\n\n${e.message}',
-        headIcon: false,
-      ).show();
-    });
-  }
+        contentText: 'Failed to scan RFID\n\n${e.message}',
+      );
+    }
+  });
 
-  Future stopThreadRFID() async {
-    await platform.invokeMethod('stopThread').catchError((e) {
-      OkDialog(
+  Future stopThreadRFID() async => await platform.invokeMethod(
+    'stopThread',
+  ).catchError((e) {
+    if(context.mounted) {
+      LocalDialogFunction.okDialog(
         context: context,
-        content: 'Failed to stop RFID Scan\n\n${e.message}',
-        headIcon: false,
-      ).show();
-    });
-  }
+        contentText: 'Failed to stop RFID Scan\n\n${e.message}',
+      );
+    }
+  });
 }

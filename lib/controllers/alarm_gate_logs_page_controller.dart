@@ -27,19 +27,22 @@ class AlarmGateLogsPageController extends State<AlarmGateLogsPage> {
     DateTime.now().day,
   );
 
-  loadAlarmLogs() async {
-    await ControlGateServices(context: context).getGateLogs(
-      DateFormat("yyyy-MM-dd").format(startDate),
-      DateFormat("yyyy-MM-dd").format(endDate),
-      isAscending,
-    ).then((result) {
+  void loadAlarmLogs() async {
+    List<GateLogsData> gateLogResult = await ControlGateServices.getGateLogs(
+      context: context,
+      startDate: DateFormat("yyyy-MM-dd").format(startDate),
+      endDate: DateFormat("yyyy-MM-dd").format(endDate),
+      isAscending: isAscending,
+    );
+
+    if(mounted) {
       setState(() {
-        gateLogsDataList = result;
+        gateLogsDataList = gateLogResult;
       });
-    });
+    }
   }
 
-  changeDate(String type) {
+  void changeDate(String type) {
     showDatePicker(
       context: context,
       initialDate: type == "start" ? startDate : endDate,
@@ -47,11 +50,11 @@ class AlarmGateLogsPageController extends State<AlarmGateLogsPage> {
       lastDate: DateTime(2080),
     ).then((newDate) {
       if(newDate != null) {
-        if(type == "start") {
+        if(mounted && type == "start") {
           setState(() {
             startDate = newDate;
           });
-        } else {
+        } else if(mounted) {
           setState(() {
             endDate = newDate;
           });
@@ -60,9 +63,9 @@ class AlarmGateLogsPageController extends State<AlarmGateLogsPage> {
     });
   }
 
-  changeSort() => setState(() {
+  void changeSort() => mounted ? setState(() {
     isAscending = !isAscending;
-  });
+  }) : {};
 
   @override
   void initState() {

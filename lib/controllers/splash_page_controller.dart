@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/home_page_controller.dart';
 import 'package:jny_self_services_library/controllers/sign_in_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/view_pages/splash_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -18,37 +18,37 @@ class SplashPageController extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    checkAuthorization();
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkAuthorization());
   }
 
-  checkAuthorization() async {
-    await SharedPrefsFunctions.readData('powerLevel').then((powerLevel) async {
-      if(powerLevel != null) {
-        await SharedPrefsFunctions.readData('account').then((account) {
-          if(account != null) {
-            Future.delayed(const Duration(seconds: 3), () async {
-              ReplaceTo(context: context, target: const HomePage()).go();
-            });
-          } else {
-            Future.delayed(const Duration(seconds: 3), () async {
-              ReplaceTo(context: context, target: const SignInPage()).go();
-            });
-          }
-        });
-      } else {
-        await SharedPrefsFunctions.writeData('powerLevel', '15').then((_) async {
-          await SharedPrefsFunctions.readData('account').then((account) {
-            if(account != null) {
-              Future.delayed(const Duration(seconds: 3), () async {
-                ReplaceTo(context: context, target: const HomePage()).go();
-              });
-            } else {
-              Future.delayed(const Duration(seconds: 3), () async {
-                ReplaceTo(context: context, target: const SignInPage()).go();
-              });
-            }
-          });
-        });
+  void checkAuthorization() async {
+    Widget target = const SignInPage();
+
+    String? powerLevel = await LocalSecureStorage.readKey(
+      key: StaticVariables.powerLevelKey,
+    );
+
+    String? account = await LocalSecureStorage.readKey(
+      key: StaticVariables.accountKey,
+    );
+
+    if(powerLevel == null) {
+      await LocalSecureStorage.writeKey(
+        key: StaticVariables.powerLevelKey,
+        data: '15',
+      );
+    }
+
+    if(account != null) {
+      target = const HomePage();
+    }
+
+    Future.delayed(Duration(seconds: 2), () {
+      if(mounted) {
+        LocalRouteNavigator.replaceWith(
+          context: context,
+          target: target,
+        );
       }
     });
   }

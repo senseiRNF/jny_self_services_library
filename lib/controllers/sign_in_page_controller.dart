@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jny_self_services_library/controllers/home_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/authorization_services.dart';
 import 'package:jny_self_services_library/view_pages/sign_in_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -18,21 +17,38 @@ class SignInPageController extends State<SignInPage> {
 
   bool obscurePass = true;
 
-  changeObscure() {
-    setState(() {
-      obscurePass = !obscurePass;
-    });
+  @override
+  void initState() {
+    super.initState();
   }
 
-  signInSystem() async {
+  void changeObscure() {
+    if(mounted) {
+      setState(() {
+        obscurePass = !obscurePass;
+      });
+    }
+  }
+
+  void signInSystem() async {
     if(usernameController.text != '' && passwordController.text != '') {
-      await AuthorizationServices(context: context).usingPassword(usernameController.text, passwordController.text).then((result) {
-        if(result == true) {
-          ReplaceTo(context: context, target: const HomePage()).go();
+      await AuthorizationServices.usingPassword(
+        context: context,
+        username: usernameController.text,
+        password: passwordController.text,
+      ).then((result) {
+        if(mounted && result) {
+          LocalRouteNavigator.replaceWith(
+            context: context,
+            target: const HomePage(),
+          );
         }
       });
     } else {
-      OkDialog(context: context, content: "Username & Password can't be empty!", headIcon: false).show();
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Username & Password can't be empty!",
+      );
     }
   }
 

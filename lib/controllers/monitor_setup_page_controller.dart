@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/shared_prefs_functions.dart';
+import 'package:jny_self_services_library/services/locals/functions/static_variables.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/book_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/services/networks/pocket_base_config.dart';
 import 'package:jny_self_services_library/view_pages/monitor_setup_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class MonitorSetupPage extends StatefulWidget {
@@ -321,39 +320,45 @@ class MonitorSetupPageController extends State<MonitorSetupPage> {
   void initState() {
     super.initState();
 
-    checkPairingID();
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkPairingID());
   }
 
   Future checkPairingID() async {
-    await SharedPrefsFunctions.readData('pairingID').then((pairingIDResult) {
-      if(pairingIDResult != null && pairingIDResult != '') {
-        setState(() {
-          pairingIDTEC.text = pairingIDResult;
-        });
-      }
-    });
+    String? pairingId = await LocalSecureStorage.readKey(
+      key: StaticVariables.pairingIdKey,
+    );
+
+    if(mounted && pairingId != null) {
+      setState(() {
+        pairingIDTEC.text = pairingId;
+      });
+    }
   }
 
-  savePairingID() async {
-    await SharedPrefsFunctions.writeData('pairingID', pairingIDTEC.text).then((writeResult) {
-      if(writeResult == true) {
-        OkDialog(
+  void savePairingID() async {
+    bool writeResult = await LocalSecureStorage.writeKey(
+      key: StaticVariables.pairingIdKey,
+      data: pairingIDTEC.text,
+    );
+
+    if(mounted && writeResult == true) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Success saving Pairing ID",
+        onClose: () => LocalRouteNavigator.closeBack(
           context: context,
-          content: "Success saving Pairing ID",
-          headIcon: true,
-          okPressed: () => CloseBack(context: context).go(),
-        ).show();
-      } else {
-        OkDialog(
-          context: context,
-          content: "Failed to save Pairing ID",
-          headIcon: false,
-        ).show();
-      }
-    });
+        ),
+      );
+    } else if(mounted) {
+      LocalDialogFunction.okDialog(
+        context: context,
+        contentText: "Failed to save Pairing ID",
+      );
+    }
   }
 
-  updateState(String state, Map args) async => await DisplayMonitorServices.sendStateToMonitor(state, args);
+  void updateState(String state, Map args) async => await DisplayMonitorServices
+      .sendStateToMonitor(state, args);
 
   @override
   Widget build(BuildContext context) {

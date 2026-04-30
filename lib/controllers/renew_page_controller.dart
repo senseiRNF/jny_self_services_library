@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jny_self_services_library/controllers/thanks_page_controller.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/book_services.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/services/networks/jsons/borrowed_books_json.dart';
 import 'package:jny_self_services_library/services/networks/jsons/library_member_json.dart';
 import 'package:jny_self_services_library/view_pages/renew_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 
 class RenewPage extends StatefulWidget {
   final LibraryMemberData libraryMemberData;
@@ -30,17 +30,23 @@ class RenewPageController extends State<RenewPage> {
   void initState() {
     super.initState();
 
-    checkUntilDate().then((_) => checkBorrowedBook());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await checkUntilDate();
+
+      checkBorrowedBook();
+    });
   }
 
-  checkUntilDate() async {
-    await BookServices(context: context).showUntilDate(fromDate, 14).then((dateResult) {
-      if(dateResult != null) {
-        setState(() {
-          untilDate = dateResult;
-        });
-      }
-    });
+  Future checkUntilDate() async {
+    String? untilDateResult = await BookServices.showUntilDate(
+      context: context, startDate: fromDate, duration: 14,
+    );
+
+    if(mounted && untilDateResult != null) {
+      setState(() {
+        untilDate = untilDateResult;
+      });
+    }
   }
 
   Future checkBorrowedBook() async {
@@ -53,32 +59,37 @@ class RenewPageController extends State<RenewPage> {
       employeeId = widget.libraryMemberData.id!.toString();
     }
 
-    await BookServices(context: context).checkCurrentBorrow(studentId, employeeId, "on loan").then((result) {
-      List<BorrowedDetailDataJson> tempList = [];
-      List<Map> tempConvertedList = [];
+    BorrowedDetailJson? currentBorrow = await BookServices.checkCurrentBorrow(
+      context: context,
+      studentId: studentId,
+      employeeId: employeeId,
+      status: "on loan",
+    );
 
-      if(result != null && result.borrowedDetailDataJson != null) {
-        for(int i = 0; i < result.borrowedDetailDataJson!.length; i++) {
-          tempList.add(result.borrowedDetailDataJson![i]);
-          tempConvertedList.add(result.borrowedDetailDataJson![i].toJson());
-        }
-      }
+    List<BorrowedDetailDataJson> tempList = [];
+    List<Map> tempConvertedList = [];
 
+    for(BorrowedDetailDataJson data in currentBorrow?.borrowedDetailDataJson ?? []) {
+      tempList.add(data);
+      tempConvertedList.add(data.toJson());
+    }
+
+    if(mounted) {
       setState(() {
         listBorrowedDetail = tempList;
       });
+    }
 
-      DisplayMonitorServices.sendStateToMonitor(
-        "SHOW_RENEW",
-        {
-          "library_member": widget.libraryMemberData.toJson(),
-          "book_list": tempConvertedList,
-        },
-      );
-    });
+    DisplayMonitorServices.sendStateToMonitor(
+      "SHOW_RENEW",
+      {
+        "library_member": widget.libraryMemberData.toJson(),
+        "book_list": tempConvertedList,
+      },
+    );
   }
 
-  renewBook(BorrowedDetailDataJson listBorrowedDetail) async {
+  void renewBook(BorrowedDetailDataJson listBorrowedDetail) async {
     String? studentId;
     String? employeeId;
 
@@ -98,17 +109,24 @@ class RenewPageController extends State<RenewPage> {
       }
     }
 
-    await BookServices(context: context).extendPeriodBook(listBorrowedDetail.id, untilDate, itemList, studentId, employeeId).then((result) {
-      if(result == true) {
-        MoveTo(
+    bool extended = await BookServices.extendPeriodBook(
+      context: context,
+      borrowId: listBorrowedDetail.id,
+      untilDate: untilDate,
+      itemList: itemList,
+      studentId: studentId,
+      employeeId: employeeId,
+    );
+
+    if(mounted && extended) {
+      LocalRouteNavigator.moveTo(
+        context: context,
+        target: const ThanksPage(type: 2),
+        callbackFunction: (_) => LocalRouteNavigator.closeBack(
           context: context,
-          target: const ThanksPage(
-            type: 2,
-          ),
-          callback: (_) => CloseBack(context: context).go(),
-        ).go();
-      }
-    });
+        ),
+      );
+    }
   }
 
   @override

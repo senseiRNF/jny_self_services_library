@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jny_self_services_library/services/locals/functions/dialog_functions.dart';
-import 'package:jny_self_services_library/services/locals/functions/route_functions.dart';
 import 'package:jny_self_services_library/services/networks/display_monitor_services.dart';
 import 'package:jny_self_services_library/view_pages/qr_scan_view_page.dart';
+import 'package:local_function_collections/local_function_collections.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -26,18 +25,20 @@ class QRScanPageController extends State<QRScanPage> {
   void initState() {
     super.initState();
 
-    checkCameraPermission();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkCameraPermission();
 
-    DisplayMonitorServices.sendStateToMonitor(
-      "SCAN_QR",
-      {
-        "library_member": {},
-        "book_list": {},
-      },
-    );
+      DisplayMonitorServices.sendStateToMonitor(
+        "SCAN_QR",
+        {
+          "library_member": {},
+          "book_list": {},
+        },
+      );
+    });
   }
 
-  checkCameraPermission() async {
+  void checkCameraPermission() async {
     await Permission.camera.status.then((permissionStatus) async {
       if(permissionStatus.isGranted || permissionStatus.isLimited) {
         return;
@@ -45,30 +46,34 @@ class QRScanPageController extends State<QRScanPage> {
         await Permission.camera.request().then((requestStatus) async {
           if(requestStatus.isGranted || requestStatus.isLimited) {
             return;
-          } else {
-            OkDialog(
+          } else if(mounted) {
+            LocalDialogFunction.okDialog(
               context: context,
-              content: 'Action canceled, Unable to access camera',
-              headIcon: false,
-              okPressed: () => CloseBack(context: context).go(),
-            ).show();
+              contentText: 'Action canceled, Unable to access camera',
+              onClose: () => LocalRouteNavigator.closeBack(
+                context: context,
+              ),
+            );
           }
         });
       }
     });
   }
 
-  updateScannedId(BarcodeCapture result) {
-    if(isCaptured == false) {
+  void updateScannedId(BarcodeCapture result) {
+    if(mounted && isCaptured == false) {
       setState(() {
         isCaptured = true;
       });
 
       final List<Barcode> barcodes = result.barcodes;
 
-      if(barcodes[0].rawValue != null) {
-        CloseBack(context: context, callbackData: barcodes[0].rawValue!).go();
-      } else {
+      if(mounted && barcodes[0].rawValue != null) {
+        LocalRouteNavigator.closeBack(
+          context: context,
+          callbackResult: barcodes[0].rawValue!,
+        );
+      } else if(mounted) {
         setState(() {
           isCaptured = false;
         });
@@ -76,10 +81,12 @@ class QRScanPageController extends State<QRScanPage> {
     }
   }
 
-  changeCameraFacing() {
-    setState(() {
-      scannerController.switchCamera();
-    });
+  void changeCameraFacing() {
+    if(mounted) {
+      setState(() {
+        scannerController.switchCamera();
+      });
+    }
   }
 
   @override
